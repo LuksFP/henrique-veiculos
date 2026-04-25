@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Henrique Veículos - seminovos e usados em Guarujá/SP. Consulte o estoque, destaques da semana e atendimento por WhatsApp."
+    />
+    <title>Henrique Veículos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Barlow:wght@400;500;600;700;800&family=Yellowtail&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="site-masthead">
+      <div class="masthead-grid">
+        <a class="brand-logo" href="#inicio" aria-label="Henrique Veículos">
+          <span class="logo-script">Henrique</span>
+          <span class="logo-sub">Veículos</span>
+          <span class="check-flag logo-flag" aria-hidden="true"></span>
+        </a>
+
+        <nav class="main-nav" aria-label="Navegação principal">
+          <div class="nav-grid">
+            <button class="menu-button" type="button" aria-expanded="false" aria-controls="site-menu">
+              Menu
+            </button>
+            <div id="site-menu" class="menu">
+              <a class="is-active" href="#inicio">Home</a>
+              <a href="#estoque">Estoque</a>
+              <a href="#avaliacao">Avaliação</a>
+              <a href="#consignacao">Consignação</a>
+              <a href="#financiamento">Financiamento</a>
+              <a href="#empresa">Empresa</a>
+              <a href="#contato">Contato</a>
+            </div>
+            <form class="nav-search" id="vehicle-search">
+              <label>
+                <span class="sr-only">Digite o veículo que procura</span>
+                <input type="search" id="search-input" placeholder="Digite o veículo que procura!" autocomplete="off" />
+              </label>
+              <button type="submit">Buscar</button>
+            </form>
+          </div>
+        </nav>
+
+        <div class="social-top" aria-label="Redes sociais">
+          <a class="social instagram" href="#contato" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="5" y="5" width="14" height="14" rx="4"></rect>
+              <circle cx="12" cy="12" r="3.5"></circle>
+              <circle cx="16.5" cy="7.5" r="1"></circle>
+            </svg>
+          </a>
+          <a class="social facebook" href="#contato" aria-label="Facebook">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M14.2 8.2H16V5.1c-.3 0-1.4-.1-2.7-.1-2.7 0-4.5 1.6-4.5 4.7v2.6H6v3.5h2.8V24h3.5v-8.2h2.9l.5-3.5h-3.4V10c0-1 .3-1.8 1.9-1.8Z"></path>
+            </svg>
+          </a>
+          <a class="social whatsapp" href="https://wa.me/5513974066867" target="_blank" rel="noreferrer" aria-label="WhatsApp">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 4.2a7.6 7.6 0 0 0-6.5 11.5L4.7 20l4.4-1.1A7.6 7.6 0 1 0 12 4.2Zm0 13.7a6 6 0 0 1-3-.8l-.2-.1-2.3.6.6-2.2-.2-.3A6.1 6.1 0 1 1 12 17.9Zm3.4-4.5c-.2-.1-1.2-.6-1.4-.7-.2-.1-.4-.1-.5.1s-.6.7-.7.9c-.1.1-.3.1-.5.1a5 5 0 0 1-1.5-.9 5.5 5.5 0 0 1-1-1.3c-.1-.2 0-.3.1-.5l.4-.4c.1-.1.1-.2.2-.4v-.4c-.1-.1-.5-1.1-.7-1.5-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 1.9s.8 2.2.9 2.4c.1.1 1.6 2.5 3.9 3.4.5.2 1 .4 1.3.4.5.2 1 .1 1.4.1.4-.1 1.2-.5 1.4-1 .2-.5.2-.9.1-1l-.4-.3Z"></path>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <main id="inicio">
+      <section class="hero">
+        <div class="hero-stage">
+          <div class="lime-panel" aria-hidden="true"></div>
+          <div class="hero-carousel reveal" id="hero-carousel" aria-label="Destaques da semana em carrossel">
+            <button class="carousel-arrow carousel-prev" type="button" aria-label="Destaque anterior">‹</button>
+            <div class="carousel-slides" id="carousel-slides">
+              <article class="carousel-slide is-active">
+                <div class="carousel-copy">
+                  <span class="title-flame" aria-hidden="true"></span>
+                  <p>Destaque da Semana</p>
+                  <h1>Estoque em destaque</h1>
+                  <div class="carousel-actions">
+                    <strong>Consulte condições</strong>
+                    <a class="button primary" href="#estoque">Ver estoque</a>
+                  </div>
+                </div>
+                <div class="carousel-photo">
+                  <div class="showroom-logo"><span>Henrique</span><small>Veículos</small><i></i></div>
+                </div>
+              </article>
+            </div>
+            <div class="carousel-dots" id="carousel-dots" aria-label="Navegação do carrossel"></div>
+            <button class="carousel-arrow carousel-next" type="button" aria-label="Próximo destaque">›</button>
+          </div>
+        </div>
+        <div class="floating-social" aria-label="Redes sociais fixas">
+          <a class="social facebook" href="#contato" aria-label="Facebook">f</a>
+          <a class="social whatsapp" href="https://wa.me/5513974066867" target="_blank" rel="noreferrer" aria-label="WhatsApp">☎</a>
+          <a class="social instagram" href="#contato" aria-label="Instagram">◎</a>
+          <a class="social email" href="mailto:henrique_veiculos@hotmail.com" aria-label="Email">✉</a>
+        </div>
+      </section>
+
+      <section class="address-bar" aria-label="Endereço e horário">
+        <div class="wrap address-grid">
+          <a
+            href="https://www.google.com/maps/search/?api=1&query=Av.%20Santos%20Dumont%2C%201384%20S%C3%ADtio%20Paecara%20Guaruj%C3%A1%20SP"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Av. Santos Dumont, 1384, Sítio Paecara (Vicente de Carvalho) - Guarujá/SP
+          </a>
+          <span>Segunda à sexta das 8:00 às 18:00 · Sábado das 8:00 às 14:00</span>
+        </div>
+      </section>
+
+      <section id="estoque" class="showroom-section">
+        <div class="showroom-wrap">
+          <header class="showroom-header">
+            <div>
+              <span class="showroom-eyebrow">Estoque completo</span>
+              <h2 class="showroom-title">Encontre seu próximo carro</h2>
+            </div>
+            <div class="showroom-count" id="stock-count">Carregando…</div>
+          </header>
+          <div class="showroom-layout">
+            <div class="stock-list" id="stock-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="contato" class="contact">
+        <div class="ticker" aria-hidden="true">
+          <div class="ticker-track">
+            <span>Encontre · Negocie · Leve pra casa</span>
+            <span class="ticker-dot">●</span>
+            <span>Desde 2010</span>
+            <span class="ticker-dot">●</span>
+            <span>Guarujá — SP</span>
+            <span class="ticker-dot">●</span>
+            <span>Seminovos selecionados</span>
+            <span class="ticker-dot">●</span>
+            <span>Financiamento próprio</span>
+            <span class="ticker-dot">●</span>
+            <span>Encontre · Negocie · Leve pra casa</span>
+            <span class="ticker-dot">●</span>
+            <span>Desde 2010</span>
+            <span class="ticker-dot">●</span>
+            <span>Guarujá — SP</span>
+            <span class="ticker-dot">●</span>
+            <span>Seminovos selecionados</span>
+            <span class="ticker-dot">●</span>
+            <span>Financiamento próprio</span>
+            <span class="ticker-dot">●</span>
+          </div>
+        </div>
+
+        <div class="outro">
+          <div class="outro-head">
+            <div class="outro-kicker">
+              <span class="outro-num">04</span>
+              <span class="outro-label">Visite · Conecte</span>
+            </div>
+            <h2 class="outro-title">
+              Venha
+              <span class="outro-italic">tomar um café</span>
+              e ver o
+              <span class="outro-stamp">
+                carro
+                <span class="outro-flag" aria-hidden="true"></span>
+              </span>
+              de perto.
+            </h2>
+            <p class="outro-lede">
+              Loja física no Guarujá. Atendimento de segunda a sábado. Aceitamos seu usado na troca.
+            </p>
+          </div>
+
+          <ol class="outro-list">
+            <li class="outro-item">
+              <span class="outro-item-num">01</span>
+              <div class="outro-item-body">
+                <span class="outro-item-label">Instagram</span>
+                <a class="outro-item-link" href="#" target="_blank" rel="noreferrer">
+                  @henriqueveiculos
+                  <span class="arrow">↗</span>
+                </a>
+              </div>
+              <span class="outro-item-meta">novidades · ofertas</span>
+            </li>
+            <li class="outro-item">
+              <span class="outro-item-num">02</span>
+              <div class="outro-item-body">
+                <span class="outro-item-label">Facebook</span>
+                <a class="outro-item-link" href="#" target="_blank" rel="noreferrer">
+                  Henrique Veículos
+                  <span class="arrow">↗</span>
+                </a>
+              </div>
+              <span class="outro-item-meta">vídeos · estoque</span>
+            </li>
+            <li class="outro-item">
+              <span class="outro-item-num">03</span>
+              <div class="outro-item-body">
+                <span class="outro-item-label">WhatsApp</span>
+                <a class="outro-item-link" href="https://wa.me/5513974066867" target="_blank" rel="noreferrer">
+                  (13) 97406-6867
+                  <span class="arrow">↗</span>
+                </a>
+              </div>
+              <span class="outro-item-meta">resposta rápida</span>
+            </li>
+            <li class="outro-item">
+              <span class="outro-item-num">04</span>
+              <div class="outro-item-body">
+                <span class="outro-item-label">Endereço</span>
+                <a class="outro-item-link" href="https://www.google.com/maps/search/?api=1&query=Av.%20Santos%20Dumont%2C%201384%20S%C3%ADtio%20Paecara%20Guaruj%C3%A1%20SP" target="_blank" rel="noreferrer">
+                  Av. Santos Dumont, 1384
+                  <span class="arrow">↗</span>
+                </a>
+              </div>
+              <span class="outro-item-meta">Guarujá / SP</span>
+            </li>
+          </ol>
+
+          <a class="outro-cta" href="#estoque">
+            <span class="outro-cta-label">Ver estoque completo</span>
+            <span class="outro-cta-arrow" aria-hidden="true">→</span>
+          </a>
+        </div>
+
+        <div class="footer-main">
+          <div class="footer-wordmark" aria-hidden="true">
+            <span class="footer-wordmark-text">HENRIQUE</span>
+            <span class="footer-wordmark-flag"></span>
+            <span class="footer-wordmark-text light">VEÍCULOS</span>
+          </div>
+
+          <div class="footer-meta">
+            <div class="footer-meta-col">
+              <span class="footer-meta-label">Telefone</span>
+              <a href="tel:+551321912176">(13) 2191-2176</a>
+              <a href="tel:+5513974066867">(13) 97406-6867</a>
+            </div>
+            <div class="footer-meta-col">
+              <span class="footer-meta-label">E-mail</span>
+              <a href="mailto:henrique_veiculos@hotmail.com">henrique_veiculos@hotmail.com</a>
+            </div>
+            <div class="footer-meta-col">
+              <span class="footer-meta-label">Horário</span>
+              <span>Seg–Sex / 8h–18h</span>
+              <span>Sáb / 8h–14h</span>
+            </div>
+            <div class="footer-meta-col">
+              <span class="footer-meta-label">Loja</span>
+              <span>Av. Santos Dumont, 1384</span>
+              <span>Vicente de Carvalho · Guarujá / SP</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <a class="whatsapp-float" href="https://wa.me/5513974066867" target="_blank" rel="noreferrer" aria-label="Chamar no WhatsApp">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 4.2a7.6 7.6 0 0 0-6.5 11.5L4.7 20l4.4-1.1A7.6 7.6 0 1 0 12 4.2Zm0 13.7a6 6 0 0 1-3-.8l-.2-.1-2.3.6.6-2.2-.2-.3A6.1 6.1 0 1 1 12 17.9Zm3.4-4.5c-.2-.1-1.2-.6-1.4-.7-.2-.1-.4-.1-.5.1s-.6.7-.7.9c-.1.1-.3.1-.5.1a5 5 0 0 1-1.5-.9 5.5 5.5 0 0 1-1-1.3c-.1-.2 0-.3.1-.5l.4-.4c.1-.1.1-.2.2-.4v-.4c-.1-.1-.5-1.1-.7-1.5-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 1.9s.8 2.2.9 2.4c.1.1 1.6 2.5 3.9 3.4.5.2 1 .4 1.3.4.5.2 1 .1 1.4.1.4-.1 1.2-.5 1.4-1 .2-.5.2-.9.1-1l-.4-.3Z"></path>
+      </svg>
+    </a>
+
+    <footer class="footer">
+      <div class="wrap footer-grid">
+        <span>© 2026 Henrique Veículos - www.henriqueveiculos.com.br</span>
+      </div>
+    </footer>
+
+    <div class="vehicle-modal" id="vehicle-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="vehicle-modal-title">
+      <div class="vehicle-modal-backdrop" data-close></div>
+      <div class="vehicle-modal-content">
+        <button type="button" class="vehicle-modal-close" data-close aria-label="Fechar">×</button>
+        <div class="vehicle-modal-body" id="vehicle-modal-body"></div>
+      </div>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>

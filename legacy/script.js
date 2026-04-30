@@ -289,6 +289,7 @@ function stockRow(vehicle, index) {
   const imageMarkup = vehicle.image
     ? `<img src="${vehicle.image}" alt="${vehicle.make} ${vehicle.model}" loading="lazy" />`
     : `<div class="showroom-logo"><span>Henrique</span><small>Veículos</small><i></i></div>`;
+  const mileage = vehicle.km ? `${vehicle.km} km` : "Km consulte";
 
   return `
     <article class="stock-row" data-search="${[
@@ -297,6 +298,7 @@ function stockRow(vehicle, index) {
       vehicle.year,
       vehicle.fuel,
       vehicle.transmission,
+      vehicle.color,
     ]
       .join(" ")
       .toLowerCase()}">
@@ -304,8 +306,15 @@ function stockRow(vehicle, index) {
         ${imageMarkup}
         <span class="year-badge">${vehicle.year}</span>
       </div>
-      <strong>${vehicle.make} ${vehicle.model}</strong>
-      <em>${vehicle.transmission} · ${vehicle.fuel}</em>
+      <div class="stock-copy">
+        <span class="stock-brand">${vehicle.make}</span>
+        <strong>${vehicle.model}</strong>
+      </div>
+      <div class="stock-specs" aria-label="Resumo do veículo">
+        <span>${vehicle.transmission}</span>
+        <span>${vehicle.fuel}</span>
+        <span>${mileage}</span>
+      </div>
       <span class="price">${vehicle.price}</span>
       <button type="button" class="open-detail" data-vehicle-index="${index}">Ver detalhes →</button>
     </article>
@@ -432,7 +441,15 @@ carouselNext.addEventListener("click", () => {
 
 form.addEventListener("submit", (event) => {
   event.preventDefault();
-  const term = input.value.trim().toLowerCase();
+  applySearch(input.value, true);
+});
+
+input.addEventListener("input", () => {
+  applySearch(input.value);
+});
+
+function applySearch(value, shouldScroll = false) {
+  const term = value.trim().toLowerCase();
   const filtered = term
     ? vehicles.filter((vehicle) =>
         [vehicle.make, vehicle.model, vehicle.year, vehicle.fuel, vehicle.transmission, vehicle.color]
@@ -443,8 +460,10 @@ form.addEventListener("submit", (event) => {
     : vehicles;
 
   renderVehicles(filtered);
-  document.querySelector("#estoque").scrollIntoView({ behavior: "smooth" });
-});
+  if (term && shouldScroll) {
+    document.querySelector("#estoque").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}
 
 function vehicleModalContent(vehicle) {
   const text = encodeURIComponent(`${vehicle.make} ${vehicle.model} ${vehicle.year}`);

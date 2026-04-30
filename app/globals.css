@@ -1,0 +1,223 @@
+@import "tailwindcss";
+@import "../legacy/styles.css";
+
+.admin-shell {
+  min-height: 100vh;
+  color: #f8fafc;
+  background:
+    radial-gradient(circle at 10% 0, rgba(134, 225, 0, 0.16), transparent 30rem),
+    linear-gradient(135deg, #050705 0%, #10160d 55%, #050705 100%);
+  font-family: var(--body);
+}
+
+.admin-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: min(1180px, calc(100% - 32px));
+  margin-inline: auto;
+  padding: 26px 0;
+}
+
+.admin-title h1,
+.login-panel h1 {
+  margin: 0;
+  font-family: var(--display);
+  font-size: clamp(2rem, 4vw, 4rem);
+  font-weight: 900;
+  line-height: 0.9;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.admin-title span,
+.login-panel span,
+.admin-card-kicker {
+  color: var(--lime-bright);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.admin-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
+  gap: 18px;
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto 48px;
+}
+
+.admin-card,
+.login-panel {
+  border: 1px solid rgba(134, 225, 0, 0.18);
+  border-radius: 8px;
+  background: rgba(8, 12, 8, 0.86);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
+}
+
+.admin-card {
+  padding: 18px;
+}
+
+.admin-card h2 {
+  margin: 8px 0 16px;
+  color: #fff;
+  font-family: var(--display);
+  font-size: 1.35rem;
+  text-transform: uppercase;
+}
+
+.admin-form {
+  display: grid;
+  gap: 12px;
+}
+
+.admin-form label {
+  display: grid;
+  gap: 6px;
+  color: #d8d8d8;
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.admin-form input,
+.admin-form textarea,
+.admin-form select,
+.login-panel input {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 10px 12px;
+  outline: 0;
+}
+
+.admin-form textarea {
+  min-height: 84px;
+  resize: vertical;
+}
+
+.admin-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.admin-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  border: 0;
+  border-radius: 999px;
+  color: #081000;
+  background: var(--lime);
+  cursor: pointer;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.admin-button.secondary {
+  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.admin-vehicle-list {
+  display: grid;
+  gap: 12px;
+}
+
+.admin-vehicle {
+  display: grid;
+  grid-template-columns: 128px minmax(0, 1fr);
+  gap: 14px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.admin-vehicle img,
+.admin-vehicle-placeholder {
+  width: 128px;
+  height: 92px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: #0b0b0b;
+}
+
+.admin-vehicle strong {
+  display: block;
+  color: #fff;
+  font-family: var(--display);
+  font-size: 1.08rem;
+  text-transform: uppercase;
+}
+
+.admin-vehicle small {
+  display: block;
+  margin: 4px 0 12px;
+  color: #b7c0ae;
+  font-weight: 700;
+}
+
+.admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-danger {
+  color: #fff;
+  background: #b91c1c;
+}
+
+.login-page {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 24px;
+  background: #050705;
+}
+
+.login-panel {
+  width: min(460px, 100%);
+  padding: 28px;
+}
+
+.login-panel form {
+  display: grid;
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.form-error {
+  margin: 0;
+  color: #fecaca;
+  font-weight: 800;
+}
+
+.form-success {
+  margin: 0;
+  color: #bbf7d0;
+  font-weight: 800;
+}
+
+@media (max-width: 900px) {
+  .admin-layout,
+  .admin-vehicle {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-vehicle img,
+  .admin-vehicle-placeholder {
+    width: 100%;
+    height: 180px;
+  }
+}

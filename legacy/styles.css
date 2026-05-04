@@ -3009,6 +3009,20 @@ h1 {
     linear-gradient(135deg, rgba(134, 225, 0, 0.22) 0%, rgba(134, 225, 0, 0.06) 100%);
 }
 
+.modal-cta.ghost {
+  color: #7a9554;
+  background: transparent;
+  border: 1px solid rgba(134, 225, 0, 0.18);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+}
+
+.modal-cta.ghost:hover {
+  color: var(--lime-bright);
+  border-color: rgba(134, 225, 0, 0.45);
+  background: rgba(134, 225, 0, 0.06);
+}
+
 @media (min-width: 720px) {
   .vehicle-modal-body {
     grid-template-columns: 1.1fr 1fr;

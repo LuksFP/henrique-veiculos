@@ -211,9 +211,16 @@ function StockRow({ vehicle, onOpen }: { vehicle: Vehicle; onOpen: () => void })
         <span>{vehicle.km ? `${vehicle.km} km` : "Km consulte"}</span>
       </div>
       <span className="price">{vehicle.price}</span>
-      <button type="button" className="open-detail" onClick={onOpen}>
+      <a
+        className="open-detail"
+        href={`/veiculo/${vehicle.id}`}
+        onClick={(e) => {
+          e.preventDefault();
+          onOpen();
+        }}
+      >
         Ver detalhes →
-      </button>
+      </a>
     </article>
   );
 }
@@ -296,6 +303,9 @@ function VehicleModal({ vehicle, onClose }: { vehicle: Vehicle | null; onClose: 
                 rel="noreferrer"
               >
                 Simular financiamento
+              </a>
+              <a className="modal-cta ghost" href={`/veiculo/${vehicle.id}`}>
+                Abrir página do veículo ↗
               </a>
             </div>
           </div>

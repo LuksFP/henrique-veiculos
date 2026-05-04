@@ -1,6 +1,5 @@
-import { Car, LogOut, Plus, Save, Trash2, Upload } from "lucide-react";
+import { Car, Plus, Save, Trash2, Upload } from "lucide-react";
 import { createVehicleAction, deleteVehicleAction, updateVehicleAction } from "@/app/actions/vehicles";
-import { logoutAction } from "@/app/actions/auth";
 import { ShowroomLogo } from "@/components/showroom-logo";
 import { createClient } from "@/lib/supabase/server";
 import { vehicleImage } from "@/lib/vehicle-shared";
@@ -142,19 +141,7 @@ export default async function AdminPage({
   const successMessage = params.success ? successMessages[params.success] ?? null : null;
 
   return (
-    <main className="admin-shell">
-      <header className="admin-topbar">
-        <div className="admin-title">
-          <span>Painel</span>
-          <h1>Estoque</h1>
-        </div>
-        <form action={logoutAction}>
-          <button className="admin-button secondary" type="submit">
-            <LogOut size={16} /> Sair
-          </button>
-        </form>
-      </header>
-
+    <main className="admin-content">
       {errorMessage ? <p className="form-error" role="alert">{errorMessage}</p> : null}
       {successMessage ? <p className="form-success" role="status">{successMessage}</p> : null}
 
@@ -215,3 +202,4 @@ export default async function AdminPage({
     </main>
   );
 }
+

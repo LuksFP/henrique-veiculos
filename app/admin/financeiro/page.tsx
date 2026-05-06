@@ -1,194 +1,244 @@
-import { createClient } from "@/lib/supabase/server";
-import { deleteSaleAction } from "@/app/actions/sales";
-import { DeleteButton } from "@/components/admin/DeleteButton";
-
 export const dynamic = "force-dynamic";
 
-const paymentLabel: Record<string, string> = {
-  a_vista: "À Vista",
-  financiado: "Financiado",
-  consorcio: "Consórcio",
-  troca: "Troca",
+import { Plus, Trash2 } from "lucide-react";
+import { requireAdmin } from "@/lib/admin";
+import { FinanceiroCharts } from "@/components/financeiro-charts";
+import { createExpenseAction, deleteExpenseAction } from "@/app/actions/expenses";
+import type { ExpenseRow, SaleRow } from "@/lib/database.types";
+
+const CATEGORY_LABELS: Record<ExpenseRow["category"], string> = {
+  aluguel: "Aluguel",
+  folha: "Folha",
+  manutencao: "Manutenção",
+  marketing: "Marketing",
+  outros: "Outros",
 };
 
-export default async function AdminFinanceiro() {
-  const supabase = await createClient();
-  const { data: sales } = await supabase!
-    .from("sales")
-    .select("*")
-    .order("sale_date", { ascending: false });
+async function getPageData() {
+  const supabase = await requireAdmin();
+  const [salesRes, expensesRes] = await Promise.all([
+    supabase.from("sales").select("*").order("sale_date", { ascending: true }),
+    supabase.from("expenses").select("*").order("expense_date", { ascending: false }),
+  ]);
+  return {
+    sales: (salesRes.data ?? []) as SaleRow[],
+    expenses: (expensesRes.data ?? []) as ExpenseRow[],
+  };
+}
 
-  const all = sales ?? [];
+const pad = (n: number) => String(n).padStart(2, "0");
+const toISO = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
-  // Monthly aggregation
-  const byMonth: Record<string, { receita: number; custo: number; lucro: number; mes: string }> = {};
-  for (const s of all) {
-    const mes = s.sale_date?.slice(0, 7) ?? "desconhecido";
-    if (!byMonth[mes]) {
-      const [y, m] = mes.split("-");
-      const label = new Date(`${y}-${m}-01`).toLocaleDateString("pt-BR", { month: "short", year: "2-digit" });
-      byMonth[mes] = { receita: 0, custo: 0, lucro: 0, mes: label };
-    }
-    byMonth[mes].receita += Number(s.sale_price ?? 0);
-    byMonth[mes].custo += Number(s.cost_price ?? 0);
-    byMonth[mes].lucro += Number(s.sale_price ?? 0) - Number(s.cost_price ?? 0);
-  }
-  const meses = Object.values(byMonth).slice(-6);
+function fmt(v: number) {
+  if (v >= 1_000_000) return `R$ ${(v / 1_000_000).toFixed(2)}M`;
+  if (v >= 1_000) return `R$ ${(v / 1_000).toFixed(0)}k`;
+  return `R$ ${v.toLocaleString("pt-BR")}`;
+}
 
-  const receitaTotal = all.reduce((s, v) => s + Number(v.sale_price ?? 0), 0);
-  const custoTotal = all.reduce((s, v) => s + Number(v.cost_price ?? 0), 0);
-  const lucroTotal = receitaTotal - custoTotal;
-  const margem = receitaTotal > 0 ? ((lucroTotal / receitaTotal) * 100).toFixed(1) : "0.0";
+function pctDelta(current: number, prev: number) {
+  if (prev === 0) return null;
+  const pct = Math.round(((current - prev) / prev) * 100);
+  return { text: `${pct >= 0 ? "+" : ""}${pct}%`, positive: pct >= 0 };
+}
 
-  const kpis = [
-    { label: "Receita Total", value: `R$ ${(receitaTotal / 1000).toFixed(0)}k`, icon: "💵" },
-    { label: "Custo Total", value: `R$ ${(custoTotal / 1000).toFixed(0)}k`, icon: "📉" },
-    { label: "Lucro Total", value: `R$ ${(lucroTotal / 1000).toFixed(0)}k`, icon: "💰" },
-    { label: "Margem", value: `${margem}%`, icon: "📈" },
-    { label: "Vendas", value: all.length, icon: "🧾" },
-  ];
+const OK: Record<string, string> = {
+  expense_created: "Despesa cadastrada.",
+  expense_deleted: "Despesa excluída.",
+};
+
+export default async function FinanceiroPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string; success?: string }>;
+}) {
+  const [{ sales, expenses }, params] = await Promise.all([getPageData(), searchParams]);
+
+  const now = new Date();
+  const daysSinceMonday = (now.getDay() + 6) % 7;
+
+  const thisWeekStart = new Date(now);
+  thisWeekStart.setDate(now.getDate() - daysSinceMonday);
+  thisWeekStart.setHours(0, 0, 0, 0);
+
+  const lastWeekStart = new Date(thisWeekStart);
+  lastWeekStart.setDate(thisWeekStart.getDate() - 7);
+
+  const thisWeekStr = toISO(thisWeekStart);
+  const lastWeekStr = toISO(lastWeekStart);
+
+  const thisMonthPrefix = `${now.getFullYear()}-${pad(now.getMonth() + 1)}`;
+  const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const lastMonthPrefix = `${lastMonthDate.getFullYear()}-${pad(lastMonthDate.getMonth() + 1)}`;
+
+  const thisWeekSales = sales.filter((s) => s.sale_date >= thisWeekStr);
+  const lastWeekSales = sales.filter((s) => s.sale_date >= lastWeekStr && s.sale_date < thisWeekStr);
+  const thisMonthSales = sales.filter((s) => s.sale_date.startsWith(thisMonthPrefix));
+  const lastMonthSales = sales.filter((s) => s.sale_date.startsWith(lastMonthPrefix));
+
+  const sum = (arr: SaleRow[]) => arr.reduce((acc, s) => acc + Number(s.sale_price), 0);
+
+  const thisWeekReceita = sum(thisWeekSales);
+  const lastWeekReceita = sum(lastWeekSales);
+  const thisMonthReceita = sum(thisMonthSales);
+  const lastMonthReceita = sum(lastMonthSales);
+
+  const weekDelta = pctDelta(thisWeekReceita, lastWeekReceita);
+  const monthDelta = pctDelta(thisMonthReceita, lastMonthReceita);
+
+  const totalReceita = sum(sales);
+  const ticketMedio = sales.length > 0 ? Math.round(totalReceita / sales.length) : 0;
 
   return (
-    <div>
-      <h1
-        className="text-3xl font-bold"
-        style={{ fontFamily: "Rajdhani, sans-serif", color: "var(--foreground)" }}
-      >
-        Financeiro
-      </h1>
-      <p className="mt-1 text-sm" style={{ color: "var(--muted-foreground)" }}>
-        Balanços e relatórios financeiros
-      </p>
-
-      {/* KPIs */}
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        {kpis.map((kpi, i) => (
-          <div
-            key={i}
-            className="rounded-xl p-4"
-            style={{ border: "1px solid var(--border)", background: "var(--card)" }}
-          >
-            <span className="text-xl">{kpi.icon}</span>
-            <div
-              className="mt-2 text-2xl font-bold"
-              style={{ fontFamily: "Rajdhani, sans-serif", color: "var(--foreground)" }}
-            >
-              {kpi.value}
-            </div>
-            <div className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-              {kpi.label}
-            </div>
-          </div>
-        ))}
+    <>
+      <div className="adm-page-head">
+        <div>
+          <h1 className="adm-page-title">Financeiro</h1>
+          <p className="adm-page-sub">Ganhos por semana e por mês</p>
+        </div>
       </div>
 
-      {/* Monthly table */}
-      {meses.length > 0 && (
-        <div
-          className="mt-8 rounded-xl overflow-hidden"
-          style={{ border: "1px solid var(--border)" }}
-        >
-          <div
-            className="px-4 py-3"
-            style={{ borderBottom: "1px solid var(--border)", background: "var(--card)" }}
-          >
-            <h3
-              className="font-bold"
-              style={{ fontFamily: "Rajdhani, sans-serif", color: "var(--foreground)" }}
-            >
-              Resumo por Mês
-            </h3>
-          </div>
-          <table className="w-full text-sm">
-            <thead>
-              <tr style={{ borderBottom: "1px solid var(--border)", background: "var(--card)" }}>
-                {["Mês", "Receita", "Custo", "Lucro", "Margem"].map((h) => (
-                  <th
-                    key={h}
-                    className="px-4 py-3 text-left font-semibold"
-                    style={{ color: "var(--foreground)", fontFamily: "Rajdhani, sans-serif" }}
-                  >
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {meses.map((m, i) => {
-                const margem2 = m.receita > 0 ? ((m.lucro / m.receita) * 100).toFixed(1) : "0.0";
-                return (
-                  <tr key={i} style={{ borderBottom: "1px solid oklch(0.28 0.01 260 / 50%)" }}>
-                    <td className="px-4 py-3 font-medium" style={{ color: "var(--foreground)" }}>{m.mes}</td>
-                    <td className="px-4 py-3" style={{ color: "var(--primary)" }}>R$ {m.receita.toLocaleString("pt-BR")}</td>
-                    <td className="px-4 py-3" style={{ color: "oklch(0.58 0.22 27)" }}>R$ {m.custo.toLocaleString("pt-BR")}</td>
-                    <td className="px-4 py-3 font-semibold" style={{ color: "var(--foreground)" }}>R$ {m.lucro.toLocaleString("pt-BR")}</td>
-                    <td className="px-4 py-3" style={{ color: "var(--muted-foreground)" }}>{margem2}%</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
+      {params.error && <div className="adm-alert adm-alert--err">{params.error}</div>}
+      {params.success && OK[params.success] && <div className="adm-alert adm-alert--ok">{OK[params.success]}</div>}
 
-      {/* Sales list */}
-      <div
-        className="mt-6 rounded-xl overflow-hidden"
-        style={{ border: "1px solid var(--border)" }}
-      >
-        <div
-          className="px-4 py-3"
-          style={{ borderBottom: "1px solid var(--border)", background: "var(--card)" }}
-        >
-          <h3
-            className="font-bold"
-            style={{ fontFamily: "Rajdhani, sans-serif", color: "var(--foreground)" }}
-          >
-            Todas as Vendas
-          </h3>
-        </div>
-        <table className="w-full text-sm">
-          <thead>
-            <tr style={{ borderBottom: "1px solid var(--border)", background: "var(--card)" }}>
-              {["Veículo", "Cliente", "Data", "Pagamento", "Valor", "Lucro", ""].map((h, i) => (
-                <th
-                  key={i}
-                  className={`px-4 py-3 text-left font-semibold ${h === "" ? "text-right" : ""}`}
-                  style={{ color: "var(--foreground)", fontFamily: "Rajdhani, sans-serif" }}
-                >
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {all.map((s) => (
-              <tr key={s.id} style={{ borderBottom: "1px solid oklch(0.28 0.01 260 / 50%)" }}>
-                <td className="px-4 py-3 font-medium" style={{ color: "var(--foreground)" }}>
-                  {s.make} {s.model} {s.year}
-                </td>
-                <td className="px-4 py-3" style={{ color: "var(--muted-foreground)" }}>{s.client_name ?? "—"}</td>
-                <td className="px-4 py-3" style={{ color: "var(--muted-foreground)" }}>{s.sale_date ? new Date(s.sale_date).toLocaleDateString("pt-BR") : "—"}</td>
-                <td className="px-4 py-3" style={{ color: "var(--muted-foreground)" }}>{paymentLabel[s.payment_method ?? ""] ?? s.payment_method}</td>
-                <td className="px-4 py-3 font-semibold" style={{ color: "var(--primary)" }}>
-                  R$ {Number(s.sale_price).toLocaleString("pt-BR")}
-                </td>
-                <td className="px-4 py-3 font-semibold" style={{ color: "var(--foreground)" }}>
-                  {s.cost_price ? `R$ ${(Number(s.sale_price) - Number(s.cost_price)).toLocaleString("pt-BR")}` : "—"}
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <DeleteButton action={deleteSaleAction} id={s.id} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {all.length === 0 && (
-          <div className="py-12 text-center text-sm" style={{ color: "var(--muted-foreground)" }}>
-            Nenhuma venda registrada ainda.
+      <div className="fin-period-cards">
+        <div className="fin-period-card">
+          <div className="fin-period-head">
+            <span className="fin-period-title">Esta Semana</span>
+            {weekDelta && (
+              <span className={`fin-delta fin-delta--${weekDelta.positive ? "up" : "down"}`}>
+                {weekDelta.positive ? "↑" : "↓"} {weekDelta.text} vs anterior
+              </span>
+            )}
           </div>
+          <div className="fin-period-value">{fmt(thisWeekReceita)}</div>
+          <div className="fin-period-count">
+            {thisWeekSales.length} venda{thisWeekSales.length !== 1 ? "s" : ""} esta semana
+          </div>
+          <div className="fin-period-prev">
+            Semana anterior: <strong>{fmt(lastWeekReceita)}</strong> · {lastWeekSales.length} venda{lastWeekSales.length !== 1 ? "s" : ""}
+          </div>
+        </div>
+
+        <div className="fin-period-card">
+          <div className="fin-period-head">
+            <span className="fin-period-title">Este Mês</span>
+            {monthDelta && (
+              <span className={`fin-delta fin-delta--${monthDelta.positive ? "up" : "down"}`}>
+                {monthDelta.positive ? "↑" : "↓"} {monthDelta.text} vs anterior
+              </span>
+            )}
+          </div>
+          <div className="fin-period-value">{fmt(thisMonthReceita)}</div>
+          <div className="fin-period-count">
+            {thisMonthSales.length} venda{thisMonthSales.length !== 1 ? "s" : ""} este mês
+          </div>
+          <div className="fin-period-prev">
+            Mês anterior: <strong>{fmt(lastMonthReceita)}</strong> · {lastMonthSales.length} venda{lastMonthSales.length !== 1 ? "s" : ""}
+          </div>
+        </div>
+      </div>
+
+      <div className="dash-kpis" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
+        <div className="dash-kpi">
+          <div className="dash-kpi-icon">💰</div>
+          <div className="dash-kpi-value">{fmt(totalReceita)}</div>
+          <div className="dash-kpi-label">Receita Total</div>
+        </div>
+        <div className="dash-kpi">
+          <div className="dash-kpi-icon">🚗</div>
+          <div className="dash-kpi-value">{sales.length}</div>
+          <div className="dash-kpi-label">Vendas Totais</div>
+        </div>
+        <div className="dash-kpi">
+          <div className="dash-kpi-icon">🏷️</div>
+          <div className="dash-kpi-value">{fmt(ticketMedio)}</div>
+          <div className="dash-kpi-label">Ticket Médio</div>
+        </div>
+      </div>
+
+      <FinanceiroCharts sales={sales} />
+
+      <details className="adm-card adm-form-card">
+        <summary className="adm-card-head">
+          <h2 className="adm-card-title">Registrar Despesa</h2>
+          <span className="adm-card-toggle">›</span>
+        </summary>
+        <div className="adm-card-body">
+          <form className="adm-form" action={createExpenseAction}>
+            <div className="adm-field">
+              <label className="adm-label">Descrição</label>
+              <input className="adm-input" name="description" required placeholder="Aluguel do galpão" />
+            </div>
+            <div className="adm-field">
+              <label className="adm-label">Valor (R$)</label>
+              <input className="adm-input" name="amount" type="number" step="0.01" required placeholder="3500" />
+            </div>
+            <div className="adm-field">
+              <label className="adm-label">Categoria</label>
+              <select className="adm-input" name="category" defaultValue="outros">
+                {(Object.entries(CATEGORY_LABELS) as [ExpenseRow["category"], string][]).map(([v, l]) => (
+                  <option key={v} value={v}>{l}</option>
+                ))}
+              </select>
+            </div>
+            <div className="adm-field">
+              <label className="adm-label">Data</label>
+              <input
+                className="adm-input"
+                name="expense_date"
+                type="date"
+                defaultValue={new Date().toISOString().split("T")[0]}
+              />
+            </div>
+            <div className="adm-field adm-field--wide">
+              <label className="adm-label">Observações</label>
+              <textarea className="adm-input adm-textarea" name="notes" placeholder="Detalhe opcional..." />
+            </div>
+            <div className="adm-form-foot">
+              <button className="adm-btn-primary" type="submit"><Plus size={15} /> Registrar Despesa</button>
+            </div>
+          </form>
+        </div>
+      </details>
+
+      <div className="adm-card">
+        <div className="adm-card-head adm-card-head--static">
+          <h3 className="adm-card-title">Despesas Operacionais</h3>
+          <span className="adm-tag adm-tag--muted">{expenses.length} registro{expenses.length !== 1 ? "s" : ""}</span>
+        </div>
+        {expenses.length === 0 ? (
+          <p className="adm-empty">Nenhuma despesa cadastrada.</p>
+        ) : (
+          <>
+            <div className="fin-table-head" style={{ gridTemplateColumns: "1fr 120px 100px 110px 60px" }}>
+              <span>Descrição</span>
+              <span>Categoria</span>
+              <span>Data</span>
+              <span style={{ textAlign: "right" }}>Valor</span>
+              <span />
+            </div>
+            {expenses.map((e) => (
+              <div key={e.id} className="fin-table-row" style={{ gridTemplateColumns: "1fr 120px 100px 110px 60px" }}>
+                <div>
+                  <div className="fin-td-main">{e.description}</div>
+                  {e.notes && <div className="fin-td-muted">{e.notes}</div>}
+                </div>
+                <span className="adm-tag adm-tag--muted">{CATEGORY_LABELS[e.category]}</span>
+                <span className="fin-td-muted">{new Date(e.expense_date).toLocaleDateString("pt-BR")}</span>
+                <span className="fin-td-value fin-td-value--neg">
+                  − R$ {Number(e.amount).toLocaleString("pt-BR")}
+                </span>
+                <form action={deleteExpenseAction} style={{ display: "flex", justifyContent: "flex-end" }}>
+                  <input type="hidden" name="id" value={e.id} />
+                  <button className="adm-btn-danger" type="submit" style={{ height: 30, padding: "0 10px", fontSize: "0.7rem" }}>
+                    <Trash2 size={13} />
+                  </button>
+                </form>
+              </div>
+            ))}
+          </>
         )}
       </div>
-    </div>
+    </>
   );
 }

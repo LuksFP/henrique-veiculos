@@ -1,356 +1,249 @@
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.5"
-  }
   public: {
     Tables: {
+      expenses: {
+        Row: {
+          id: string;
+          description: string;
+          amount: number;
+          category: "aluguel" | "folha" | "manutencao" | "marketing" | "outros";
+          expense_date: string;
+          notes: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          description: string;
+          amount: number;
+          category?: "aluguel" | "folha" | "manutencao" | "marketing" | "outros";
+          expense_date?: string;
+          notes?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          description?: string;
+          amount?: number;
+          category?: "aluguel" | "folha" | "manutencao" | "marketing" | "outros";
+          expense_date?: string;
+          notes?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       admin_users: {
         Row: {
-          created_at: string
-          email: string
-          is_admin: boolean
-          user_id: string
-        }
+          created_at: string;
+          email: string;
+          is_admin: boolean;
+          user_id: string;
+        };
         Insert: {
-          created_at?: string
-          email: string
-          is_admin?: boolean
-          user_id: string
-        }
+          created_at?: string;
+          email: string;
+          is_admin?: boolean;
+          user_id: string;
+        };
         Update: {
-          created_at?: string
-          email?: string
-          is_admin?: boolean
-          user_id?: string
-        }
-        Relationships: []
-      }
+          created_at?: string;
+          email?: string;
+          is_admin?: boolean;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       leads: {
         Row: {
-          created_at: string
-          email: string | null
-          id: string
-          name: string
-          notes: string | null
-          phone: string
-          source: string
-          status: string
-          updated_at: string
-          vehicle_id: string | null
-          vehicle_label: string | null
-        }
+          id: string;
+          name: string;
+          phone: string;
+          email: string | null;
+          vehicle_id: string | null;
+          vehicle_label: string | null;
+          status: "novo" | "contato" | "proposta" | "fechado" | "perdido";
+          source: "whatsapp" | "site" | "indicacao" | "instagram" | "outro";
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
         Insert: {
-          created_at?: string
-          email?: string | null
-          id?: string
-          name: string
-          notes?: string | null
-          phone: string
-          source?: string
-          status?: string
-          updated_at?: string
-          vehicle_id?: string | null
-          vehicle_label?: string | null
-        }
+          id?: string;
+          name: string;
+          phone: string;
+          email?: string | null;
+          vehicle_id?: string | null;
+          vehicle_label?: string | null;
+          status?: "novo" | "contato" | "proposta" | "fechado" | "perdido";
+          source?: "whatsapp" | "site" | "indicacao" | "instagram" | "outro";
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
         Update: {
-          created_at?: string
-          email?: string | null
-          id?: string
-          name?: string
-          notes?: string | null
-          phone?: string
-          source?: string
-          status?: string
-          updated_at?: string
-          vehicle_id?: string | null
-          vehicle_label?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "leads_vehicle_id_fkey"
-            columns: ["vehicle_id"]
-            isOneToOne: false
-            referencedRelation: "vehicles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+          id?: string;
+          name?: string;
+          phone?: string;
+          email?: string | null;
+          vehicle_id?: string | null;
+          vehicle_label?: string | null;
+          status?: "novo" | "contato" | "proposta" | "fechado" | "perdido";
+          source?: "whatsapp" | "site" | "indicacao" | "instagram" | "outro";
+          notes?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       sales: {
         Row: {
-          client_name: string
-          commission: number
-          cost_price: number
-          created_at: string
-          id: string
-          lead_id: string | null
-          make: string
-          model: string
-          notes: string | null
-          payment_method: string
-          sale_date: string
-          sale_price: number
-          vehicle_id: string | null
-          year: number
-        }
+          id: string;
+          vehicle_id: string | null;
+          make: string;
+          model: string;
+          year: number;
+          lead_id: string | null;
+          client_name: string;
+          sale_price: number;
+          cost_price: number;
+          commission: number;
+          payment_method: "a_vista" | "financiado" | "consorcio" | "troca";
+          sale_date: string;
+          notes: string | null;
+          created_at: string;
+        };
         Insert: {
-          client_name?: string
-          commission?: number
-          cost_price?: number
-          created_at?: string
-          id?: string
-          lead_id?: string | null
-          make: string
-          model: string
-          notes?: string | null
-          payment_method?: string
-          sale_date?: string
-          sale_price: number
-          vehicle_id?: string | null
-          year: number
-        }
+          id?: string;
+          vehicle_id?: string | null;
+          make: string;
+          model: string;
+          year: number;
+          lead_id?: string | null;
+          client_name?: string;
+          sale_price: number;
+          cost_price?: number;
+          commission?: number;
+          payment_method?: "a_vista" | "financiado" | "consorcio" | "troca";
+          sale_date?: string;
+          notes?: string | null;
+          created_at?: string;
+        };
         Update: {
-          client_name?: string
-          commission?: number
-          cost_price?: number
-          created_at?: string
-          id?: string
-          lead_id?: string | null
-          make?: string
-          model?: string
-          notes?: string | null
-          payment_method?: string
-          sale_date?: string
-          sale_price?: number
-          vehicle_id?: string | null
-          year?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "sales_lead_id_fkey"
-            columns: ["lead_id"]
-            isOneToOne: false
-            referencedRelation: "leads"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "sales_vehicle_id_fkey"
-            columns: ["vehicle_id"]
-            isOneToOne: false
-            referencedRelation: "vehicles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+          vehicle_id?: string | null;
+          make?: string;
+          model?: string;
+          year?: number;
+          lead_id?: string | null;
+          client_name?: string;
+          sale_price?: number;
+          cost_price?: number;
+          commission?: number;
+          payment_method?: "a_vista" | "financiado" | "consorcio" | "troca";
+          sale_date?: string;
+          notes?: string | null;
+        };
+        Relationships: [];
+      };
+      vehicle_images: {
+        Row: {
+          id: string;
+          vehicle_id: string;
+          url: string;
+          path: string;
+          sort_order: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          vehicle_id: string;
+          url: string;
+          path: string;
+          sort_order?: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          vehicle_id?: string;
+          url?: string;
+          path?: string;
+          sort_order?: number;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       vehicles: {
         Row: {
-          bg: string | null
-          color: string | null
-          created_at: string
-          fuel: string
-          id: string
-          image_path: string | null
-          image_url: string | null
-          is_available: boolean
-          is_featured: boolean
-          km: string | null
-          make: string
-          model: string
-          options: string[]
-          price: string
-          sort_order: number
-          transmission: string
-          updated_at: string
-          year: number
-        }
+          bg: string | null;
+          color: string | null;
+          created_at: string;
+          fuel: string;
+          id: string;
+          image_path: string | null;
+          image_url: string | null;
+          is_available: boolean;
+          is_featured: boolean;
+          km: string | null;
+          make: string;
+          model: string;
+          options: string[];
+          price: string;
+          sort_order: number;
+          transmission: string;
+          updated_at: string;
+          year: number;
+        };
         Insert: {
-          bg?: string | null
-          color?: string | null
-          created_at?: string
-          fuel: string
-          id?: string
-          image_path?: string | null
-          image_url?: string | null
-          is_available?: boolean
-          is_featured?: boolean
-          km?: string | null
-          make: string
-          model: string
-          options?: string[]
-          price: string
-          sort_order?: number
-          transmission: string
-          updated_at?: string
-          year: number
-        }
+          bg?: string | null;
+          color?: string | null;
+          created_at?: string;
+          fuel: string;
+          id?: string;
+          image_path?: string | null;
+          image_url?: string | null;
+          is_available?: boolean;
+          is_featured?: boolean;
+          km?: string | null;
+          make: string;
+          model: string;
+          options?: string[];
+          price: string;
+          sort_order?: number;
+          transmission: string;
+          updated_at?: string;
+          year: number;
+        };
         Update: {
-          bg?: string | null
-          color?: string | null
-          created_at?: string
-          fuel?: string
-          id?: string
-          image_path?: string | null
-          image_url?: string | null
-          is_available?: boolean
-          is_featured?: boolean
-          km?: string | null
-          make?: string
-          model?: string
-          options?: string[]
-          price?: string
-          sort_order?: number
-          transmission?: string
-          updated_at?: string
-          year?: number
-        }
-        Relationships: []
-      }
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      is_admin: { Args: never; Returns: boolean }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
-}
+          bg?: string | null;
+          color?: string | null;
+          created_at?: string;
+          fuel?: string;
+          id?: string;
+          image_path?: string | null;
+          image_url?: string | null;
+          is_available?: boolean;
+          is_featured?: boolean;
+          km?: string | null;
+          make?: string;
+          model?: string;
+          options?: string[];
+          price?: string;
+          sort_order?: number;
+          transmission?: string;
+          updated_at?: string;
+          year?: number;
+        };
+        Relationships: [];
+      };
+    };
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
+    Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
+  };
+};
 
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
-
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
-
-export type Tables<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R
-    }
-    ? R
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
-      }
-      ? R
-      : never
-    : never
-
-export type TablesInsert<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
-    }
-    ? I
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
-      }
-      ? I
-      : never
-    : never
-
-export type TablesUpdate<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
-    }
-    ? U
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
-      }
-      ? U
-      : never
-    : never
-
-export type Enums<
-  DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
-    | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
-> = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
-
-export type CompositeTypes<
-  PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
-> = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
-
-export const Constants = {
-  public: {
-    Enums: {},
-  },
-} as const
-
-export type VehicleRow = Database["public"]["Tables"]["vehicles"]["Row"]
+export type ExpenseRow = Database["public"]["Tables"]["expenses"]["Row"];
+export type VehicleRow = Database["public"]["Tables"]["vehicles"]["Row"];
+export type VehicleImageRow = Database["public"]["Tables"]["vehicle_images"]["Row"];
+export type LeadRow = Database["public"]["Tables"]["leads"]["Row"];
+export type SaleRow = Database["public"]["Tables"]["sales"]["Row"];

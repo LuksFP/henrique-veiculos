@@ -1,151 +1,155 @@
-import { createClient } from "@/lib/supabase/server";
-
 export const dynamic = "force-dynamic";
 
-export default async function AdminDashboard() {
-  const supabase = await createClient();
+import { requireAdmin } from "@/lib/admin";
+import { DashboardCharts } from "@/components/dashboard-charts";
+import type { MonthlyData, LeadStatusData, RecentSale } from "@/components/dashboard-charts";
 
-  const [{ data: vehicles }, { data: leads }, { data: sales }] = await Promise.all([
-    supabase!.from("vehicles").select("id, is_available, is_featured"),
-    supabase!.from("leads").select("id, status, created_at"),
-    supabase!.from("sales").select("id, sale_price, cost_price, sale_date, vehicle_id, make, model, client_name"),
+const MONTH_LABELS = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+const STATUS_LABELS: Record<string, string> = {
+  novo: "Novo",
+  contato: "Contato",
+  proposta: "Proposta",
+  fechado: "Fechado",
+  perdido: "Perdido",
+};
+
+async function getDashboardData() {
+  const supabase = await requireAdmin();
+
+  const now = new Date();
+  const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split("T")[0];
+  const eightMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 7, 1).toISOString().split("T")[0];
+
+  const [vehiclesRes, monthSalesRes, allSalesRes, leadsRes, recentSalesRes] = await Promise.all([
+    supabase.from("vehicles").select("is_available, is_featured"),
+    supabase.from("sales").select("sale_price").gte("sale_date", firstOfMonth),
+    supabase
+      .from("sales")
+      .select("id, make, model, year, client_name, sale_price, cost_price, sale_date")
+      .gte("sale_date", eightMonthsAgo)
+      .order("sale_date", { ascending: true }),
+    supabase.from("leads").select("status"),
+    supabase
+      .from("sales")
+      .select("id, make, model, year, client_name, sale_price, cost_price, sale_date")
+      .order("sale_date", { ascending: false })
+      .limit(5),
   ]);
 
-  const totalEstoque = vehicles?.filter((v) => v.is_available).length ?? 0;
-  const leadsAtivos = leads?.filter((l) => l.status === "novo" || l.status === "em_negociacao").length ?? 0;
-  const vendasMes = (() => {
-    const now = new Date();
-    const mes = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-    return sales?.filter((s) => s.sale_date?.startsWith(mes)) ?? [];
-  })();
-  const receitaMes = vendasMes.reduce((s, v) => s + Number(v.sale_price ?? 0), 0);
-  const ticketMedio = vendasMes.length > 0 ? receitaMes / vendasMes.length : 0;
+  const vehicles = vehiclesRes.data ?? [];
+  const monthSales = monthSalesRes.data ?? [];
+  const allSales = allSalesRes.data ?? [];
+  const leadsData = leadsRes.data ?? [];
+  const recentSalesData = recentSalesRes.data ?? [];
+
+  // KPIs
+  const totalVeiculos = vehicles.length;
+  const disponiveis = vehicles.filter((v) => v.is_available).length;
+  const vendasNoMes = monthSales.length;
+  const receitaMensal = monthSales.reduce((s, v) => s + Number(v.sale_price), 0);
+  const leadsAtivos = leadsData.filter((l) => ["novo", "contato", "proposta"].includes(l.status)).length;
+  const ticketMedio = vendasNoMes > 0 ? Math.round(receitaMensal / vendasNoMes) : 0;
+
+  // Monthly chart data (last 8 months)
+  const monthMap = new Map<string, { receita: number; lucro: number }>();
+  for (const s of allSales) {
+    const d = new Date(s.sale_date);
+    const label = `${MONTH_LABELS[d.getMonth()]}/${String(d.getFullYear()).slice(2)}`;
+    const cur = monthMap.get(label) ?? { receita: 0, lucro: 0 };
+    monthMap.set(label, {
+      receita: cur.receita + Number(s.sale_price),
+      lucro: cur.lucro + (Number(s.sale_price) - Number(s.cost_price)),
+    });
+  }
+  const financeiroMensal: MonthlyData[] = Array.from(monthMap.entries()).map(([mes, v]) => ({ mes, ...v }));
+
+  // Leads by status for pie chart
+  const statusMap = new Map<string, number>();
+  for (const l of leadsData) {
+    statusMap.set(l.status, (statusMap.get(l.status) ?? 0) + 1);
+  }
+  const leadsByStatus: LeadStatusData[] = Array.from(statusMap.entries()).map(([key, value]) => ({
+    name: STATUS_LABELS[key] ?? key,
+    value,
+  }));
+
+  // Recent sales
+  const recentSales: RecentSale[] = recentSalesData.map((s) => ({
+    id: s.id,
+    veiculoNome: `${s.make} ${s.model} ${s.year}`,
+    cliente: s.client_name,
+    valor: Number(s.sale_price),
+    lucro: Number(s.sale_price) - Number(s.cost_price),
+    data: new Date(s.sale_date).toLocaleDateString("pt-BR"),
+  }));
+
+  return {
+    totalVeiculos,
+    disponiveis,
+    vendasNoMes,
+    receitaMensal,
+    leadsAtivos,
+    ticketMedio,
+    financeiroMensal,
+    leadsByStatus,
+    recentSales,
+  };
+}
+
+function formatCurrency(value: number) {
+  if (value >= 1_000_000) return `R$ ${(value / 1_000_000).toFixed(2)}M`;
+  if (value >= 1_000) return `R$ ${(value / 1_000).toFixed(0)}k`;
+  return `R$ ${value.toLocaleString("pt-BR")}`;
+}
+
+export default async function AdminDashboard() {
+  const {
+    totalVeiculos,
+    disponiveis,
+    vendasNoMes,
+    receitaMensal,
+    leadsAtivos,
+    ticketMedio,
+    financeiroMensal,
+    leadsByStatus,
+    recentSales,
+  } = await getDashboardData();
 
   const kpis = [
-    { label: "Veículos em Estoque", value: totalEstoque, icon: "🚗" },
-    { label: "Vendas no Mês", value: vendasMes.length, icon: "📈" },
+    { label: "Veículos em Estoque", value: totalVeiculos, sub: `${disponiveis} disponíveis`, icon: "🚗" },
+    { label: "Vendas no Mês", value: vendasNoMes, icon: "📈" },
     { label: "Leads Ativos", value: leadsAtivos, icon: "📞" },
-    { label: "Receita Mensal", value: `R$ ${(receitaMes / 1000).toFixed(0)}k`, icon: "💰" },
-    { label: "Ticket Médio", value: `R$ ${(ticketMedio / 1000).toFixed(0)}k`, icon: "🎯" },
+    { label: "Receita Mensal", value: formatCurrency(receitaMensal), icon: "💰" },
+    { label: "Ticket Médio", value: formatCurrency(ticketMedio), icon: "🎯" },
   ];
 
-  const recentSales = (sales ?? []).slice(0, 5);
-
   return (
-    <div>
-      <h1
-        className="text-3xl font-bold"
-        style={{ fontFamily: "Rajdhani, sans-serif", color: "var(--foreground)" }}
-      >
-        Dashboard
-      </h1>
-      <p className="mt-1 text-sm" style={{ color: "var(--muted-foreground)" }}>
-        Visão geral da concessionária
-      </p>
+    <>
+      <div className="adm-page-head">
+        <div>
+          <h1 className="adm-page-title">Dashboard</h1>
+          <p className="adm-page-sub">Visão geral da concessionária</p>
+        </div>
+      </div>
 
-      {/* KPIs */}
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        {kpis.map((kpi, i) => (
-          <div
-            key={i}
-            className="rounded-xl p-4"
-            style={{ border: "1px solid var(--border)", background: "var(--card)" }}
-          >
-            <span className="text-2xl">{kpi.icon}</span>
-            <div
-              className="mt-2 text-2xl font-bold"
-              style={{ fontFamily: "Rajdhani, sans-serif", color: "var(--foreground)" }}
-            >
-              {kpi.value}
-            </div>
-            <div className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-              {kpi.label}
-            </div>
+      <div className="dash-kpis">
+        {kpis.map((kpi) => (
+          <div key={kpi.label} className="dash-kpi">
+            <span className="dash-kpi-icon">{kpi.icon}</span>
+            <div className="dash-kpi-value">{kpi.value}</div>
+            <div className="dash-kpi-label">{kpi.label}</div>
+            {"sub" in kpi && kpi.sub && (
+              <div style={{ fontSize: "0.65rem", color: "oklch(0.45 0.01 260)", marginTop: 2 }}>{kpi.sub}</div>
+            )}
           </div>
         ))}
       </div>
 
-      {/* Vendas recentes */}
-      <div className="mt-8">
-        <div
-          className="rounded-xl p-5"
-          style={{ border: "1px solid var(--border)", background: "var(--card)" }}
-        >
-          <h3
-            className="mb-4 text-lg font-bold"
-            style={{ fontFamily: "Rajdhani, sans-serif", color: "var(--foreground)" }}
-          >
-            Vendas Recentes
-          </h3>
-          {recentSales.length === 0 ? (
-            <p className="text-sm" style={{ color: "var(--muted-foreground)" }}>
-              Nenhuma venda registrada ainda.
-            </p>
-          ) : (
-            <div className="space-y-3">
-              {recentSales.map((v) => (
-                <div
-                  key={v.id}
-                  className="flex items-center justify-between rounded-lg p-3"
-                  style={{ border: "1px solid var(--border)", background: "var(--background)" }}
-                >
-                  <div>
-                    <div
-                      className="text-sm font-semibold"
-                      style={{ color: "var(--foreground)" }}
-                    >
-                      {v.make} {v.model}
-                    </div>
-                    <div className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-                      {v.client_name} • {v.sale_date}
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-sm font-bold" style={{ color: "var(--primary)" }}>
-                      R$ {Number(v.sale_price).toLocaleString("pt-BR")}
-                    </div>
-                    {v.cost_price && (
-                      <div className="text-xs" style={{ color: "var(--chart-2)" }}>
-                        custo R$ {Number(v.cost_price).toLocaleString("pt-BR")}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Lead breakdown */}
-      <div className="mt-6 grid gap-4 sm:grid-cols-4">
-        {(["novo", "em_negociacao", "fechado", "perdido"] as const).map((s) => {
-          const count = leads?.filter((l) => l.status === s).length ?? 0;
-          const labels: Record<string, string> = {
-            novo: "Novos",
-            em_negociacao: "Em Negociação",
-            fechado: "Fechados",
-            perdido: "Perdidos",
-          };
-          return (
-            <div
-              key={s}
-              className="rounded-xl p-4"
-              style={{ border: "1px solid var(--border)", background: "var(--card)" }}
-            >
-              <div
-                className="text-2xl font-bold"
-                style={{ fontFamily: "Rajdhani, sans-serif", color: "var(--foreground)" }}
-              >
-                {count}
-              </div>
-              <div className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-                {labels[s]}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
+      <DashboardCharts
+        financeiroMensal={financeiroMensal}
+        leadsByStatus={leadsByStatus}
+        recentSales={recentSales}
+      />
+    </>
   );
 }

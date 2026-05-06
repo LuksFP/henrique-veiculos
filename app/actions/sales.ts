@@ -3,87 +3,103 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
-import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@/lib/database.types";
-
-type DBClient = SupabaseClient<Database>;
+import { requireAdmin } from "@/lib/admin";
 
 const saleSchema = z.object({
-  vehicle_id: z.string().uuid().optional().or(z.literal("")),
   make: z.string().trim().min(1, "Marca obrigatória").max(60).transform((v) => v.toUpperCase()),
   model: z.string().trim().min(1, "Modelo obrigatório").max(120).transform((v) => v.toUpperCase()),
   year: z.coerce.number().int().min(1900).max(2100),
-  client_name: z.string().trim().max(200).optional().transform((v) => v || ""),
-  lead_id: z.string().uuid().optional().or(z.literal("")),
-  sale_price: z.coerce.number().positive("Preço inválido"),
-  cost_price: z.coerce.number().min(0).optional().transform((v) => v ?? 0),
-  commission: z.coerce.number().min(0).optional().transform((v) => v ?? 0),
+  client_name: z.string().trim().min(1, "Cliente obrigatório").max(120),
+  sale_price: z.coerce.number().min(0),
+  cost_price: z.coerce.number().min(0).default(0),
+  commission: z.coerce.number().min(0).default(0),
   payment_method: z.enum(["a_vista", "financiado", "consorcio", "troca"]).default("a_vista"),
-  sale_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Data inválida"),
-  notes: z.string().trim().max(2000).optional().transform((v) => v || null),
+  sale_date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Data inválida")
+    .optional()
+    .transform((v) => v ?? new Date().toISOString().split("T")[0]),
+  notes: z.string().trim().max(500).optional().transform((v) => v || null),
+  vehicle_id: z.preprocess((v) => v === "" ? null : v, z.string().uuid().nullable().optional()),
+  lead_id: z.preprocess((v) => v === "" ? null : v, z.string().uuid().nullable().optional()),
 });
 
-async function requireAdmin(): Promise<DBClient> {
-  const supabase = await createClient();
-  if (!supabase) redirect("/login?error=missing-env");
-
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
-
-  const { data: admin } = await supabase
-    .from("admin_users")
-    .select("is_admin")
-    .eq("user_id", user.id)
-    .eq("is_admin", true)
-    .maybeSingle();
-
-  if (!admin?.is_admin) redirect("/login?error=not-admin");
-  return supabase;
+function fail(msg: string): never {
+  redirect(`/admin/vendas?error=${encodeURIComponent(msg)}`);
 }
 
-function fail(message: string): never {
-  redirect(`/admin/financeiro?error=${encodeURIComponent(message)}`);
+function parsePayload(formData: FormData) {
+  const parsed = saleSchema.safeParse({
+    make: formData.get("make"),
+    model: formData.get("model"),
+    year: formData.get("year"),
+    client_name: formData.get("client_name"),
+    sale_price: formData.get("sale_price"),
+    cost_price: formData.get("cost_price"),
+    commission: formData.get("commission"),
+    payment_method: formData.get("payment_method"),
+    sale_date: formData.get("sale_date"),
+    notes: formData.get("notes"),
+    vehicle_id: formData.get("vehicle_id"),
+    lead_id: formData.get("lead_id"),
+  });
+  if (!parsed.success) fail(parsed.error.issues[0]?.message ?? "Dados inválidos.");
+  return parsed.data;
+}
+
+function revalidate() {
+  revalidatePath("/admin/vendas");
+  revalidatePath("/admin/financeiro");
+  revalidatePath("/admin");
 }
 
 export async function createSaleAction(formData: FormData) {
   const supabase = await requireAdmin();
-
-  const raw = {
-    vehicle_id: formData.get("vehicle_id") || undefined,
-    make: formData.get("make"),
-    model: formData.get("model"),
-    year: formData.get("year"),
-    client_name: formData.get("client_name") || undefined,
-    lead_id: formData.get("lead_id") || undefined,
-    sale_price: formData.get("sale_price"),
-    cost_price: formData.get("cost_price") || undefined,
-    commission: formData.get("commission") || undefined,
-    payment_method: formData.get("payment_method") || "a_vista",
-    sale_date: formData.get("sale_date") || new Date().toISOString().slice(0, 10),
-    notes: formData.get("notes") || undefined,
-  };
-
-  const parsed = saleSchema.safeParse(raw);
-  if (!parsed.success) fail(parsed.error.issues[0]?.message ?? "Dados inválidos.");
-
-  const data = {
-    ...parsed.data,
-    vehicle_id: parsed.data.vehicle_id || null,
-    lead_id: parsed.data.lead_id || null,
-  };
+  const data = parsePayload(formData);
 
   const { error } = await supabase.from("sales").insert(data);
   if (error) fail(error.message);
 
-  // Mark vehicle as sold (unavailable) when a sale is registered
+  // Marca veículo como vendido
   if (data.vehicle_id) {
     await supabase.from("vehicles").update({ is_available: false }).eq("id", data.vehicle_id);
-    revalidatePath("/");
+    revalidatePath("/admin/veiculos");
   }
 
-  revalidatePath("/admin/financeiro");
-  redirect("/admin/financeiro?success=created");
+  // Fecha o lead vinculado
+  if (data.lead_id) {
+    await supabase.from("leads").update({ status: "fechado" }).eq("id", data.lead_id);
+    revalidatePath("/admin/crm");
+  }
+
+  revalidate();
+  redirect("/admin/vendas?success=created");
+}
+
+export async function updateSaleAction(formData: FormData) {
+  const supabase = await requireAdmin();
+  const id = String(formData.get("id") ?? "").trim();
+  if (!id) fail("ID da venda ausente.");
+
+  // Recupera vehicle_id anterior antes de atualizar
+  const { data: old } = await supabase.from("sales").select("vehicle_id").eq("id", id).maybeSingle();
+
+  const data = parsePayload(formData);
+  const { error } = await supabase.from("sales").update(data).eq("id", id);
+  if (error) fail(error.message);
+
+  // Se trocou de veículo, reativa o anterior
+  if (old?.vehicle_id && old.vehicle_id !== data.vehicle_id) {
+    await supabase.from("vehicles").update({ is_available: true }).eq("id", old.vehicle_id);
+  }
+  // Marca o novo veículo como vendido
+  if (data.vehicle_id) {
+    await supabase.from("vehicles").update({ is_available: false }).eq("id", data.vehicle_id);
+    revalidatePath("/admin/veiculos");
+  }
+
+  revalidate();
+  redirect("/admin/vendas?success=updated");
 }
 
 export async function deleteSaleAction(formData: FormData) {
@@ -91,9 +107,18 @@ export async function deleteSaleAction(formData: FormData) {
   const id = String(formData.get("id") ?? "").trim();
   if (!id) fail("ID da venda ausente.");
 
+  // Recupera vehicle_id antes de deletar
+  const { data: sale } = await supabase.from("sales").select("vehicle_id").eq("id", id).maybeSingle();
+
   const { error } = await supabase.from("sales").delete().eq("id", id);
   if (error) fail(error.message);
 
-  revalidatePath("/admin/financeiro");
-  redirect("/admin/financeiro?success=deleted");
+  // Reativa o veículo
+  if (sale?.vehicle_id) {
+    await supabase.from("vehicles").update({ is_available: true }).eq("id", sale.vehicle_id);
+    revalidatePath("/admin/veiculos");
+  }
+
+  revalidate();
+  redirect("/admin/vendas?success=deleted");
 }

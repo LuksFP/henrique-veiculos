@@ -1,75 +1,204 @@
-# Henrique Veículos
+# Henrique Veículos — Admin Panel
 
-Site institucional e painel administrativo para revenda de seminovos em Guarujá/SP.
+Sistema de gestão para concessionária. Next.js 16 App Router + Supabase + design dark neon lime.
+
+---
 
 ## Stack
 
-- **Next.js 16** (App Router, Turbopack, Server Actions)
-- **Supabase** (Auth, Postgres, Storage)
-- **Tailwind CSS v4**
-- **TypeScript** (strict)
+| Camada | Tecnologia |
+|--------|-----------|
+| Framework | Next.js 16 (App Router, Turbopack) |
+| Backend | Supabase (Auth, PostgreSQL, Storage) |
+| Estilo | CSS puro com oklch color space, sem Tailwind no admin |
+| Fonte | Rajdhani (display) via `next/font/google` |
+| Gráficos | Recharts (Bar, Line, Area, Pie) |
+| Validação | Zod |
+| Ícones | Lucide React |
 
-## Estrutura
-
-```
-app/
-  (site)/          → site público (home, listagem, detalhe do veículo)
-  admin/           → painel administrativo protegido por auth
-    dashboard/     → KPIs e resumo
-    veiculos/      → CRUD de estoque com busca e paginação
-    cadastro/      → cadastro de novo veículo com upload de foto
-    crm/           → leads com status kanban e form de criação manual
-    vendas/        → registro de vendas
-    financeiro/    → relatório financeiro com KPIs
-  login/           → autenticação via Supabase Auth
-  actions/         → Server Actions (vehicles, leads, sales, auth)
-components/admin/  → SubmitButton, DeleteButton, AlertBanner,
-                     VehicleFilters, ImagePreview, LeadStatusSelect
-lib/supabase/      → client (browser) + server (SSR)
-```
-
-## Variáveis de ambiente
-
-Crie `.env.local` na raiz:
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=https://<ref>.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon-key>
-```
+---
 
 ## Rodar localmente
 
 ```bash
+# 1. Instalar dependências
 npm install
-npm run dev       # Turbopack dev server em http://localhost:3000
-npm run build     # build de produção
-npm start         # serve o build de produção
+
+# 2. Puxar variáveis de ambiente do Vercel
+vercel env pull .env.local
+
+# 3. Subir servidor
+npm run dev
 ```
 
-## Admin
+Acesse `http://localhost:3000`.
 
-Acesse `/login` com as credenciais de admin. O usuário precisa existir em `auth.users` e ter um registro em `admin_users` com `is_admin = true`.
+> Sem o `.env.local` o app usa fallback de dados estáticos no showroom público. O admin redireciona para `/login`.
 
-Para criar um admin via SQL:
+---
+
+## Variáveis de ambiente necessárias
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+```
+
+---
+
+## Estrutura do projeto
+
+```
+app/
+  page.tsx                  → Showroom público (lista de veículos)
+  login/page.tsx            → Login admin
+  admin/
+    layout.tsx              → Shell com sidebar fixa (240px)
+    page.tsx                → Dashboard (KPIs + gráficos)
+    veiculos/page.tsx       → CRUD de veículos + upload de foto
+    crm/page.tsx            → Gestão de leads
+    vendas/page.tsx         → Histórico de vendas com CRUD
+    financeiro/page.tsx     → KPIs financeiros + gráficos por mês
+
+components/
+  admin-sidebar.tsx         → Sidebar com navegação ativa
+  dashboard-charts.tsx      → Gráficos do dashboard (mock)
+  crm-client.tsx            → Client component: filtros + painel de lead
+  financeiro-charts.tsx     → Client component: gráficos mensais
+
+app/actions/
+  auth.ts                   → loginAction, logoutAction
+  vehicles.ts               → createVehicleAction, updateVehicleAction, deleteVehicleAction
+  leads.ts                  → createLeadAction, updateLeadAction, deleteLeadAction
+  sales.ts                  → createSaleAction, updateSaleAction, deleteSaleAction
+
+lib/
+  supabase/server.ts        → Cliente Supabase para Server Components
+  supabase/browser.ts       → Cliente Supabase para Client Components
+  database.types.ts         → Tipos gerados: VehicleRow, LeadRow, SaleRow
+  vehicles.ts               → getVehicles() com fallback estático
+
+supabase/migrations/
+  20260429190000_core_schema.sql      → vehicles, vehicle_images, profiles
+  20260429190100_rls_policies.sql     → RLS para vehicles/profiles
+  20260429190200_storage_bucket.sql   → Bucket vehicle-photos
+  20260429201000_initial_schema.sql   → Schema completo com admin_users
+  20260506000000_sales_cost_commission.sql → cost_price, commission, client_name em sales
+```
+
+---
+
+## Banco de dados (Supabase)
+
+### Tabelas
+
+#### `vehicles`
+Estoque de veículos. Campos: `make`, `model`, `year`, `km`, `fuel`, `transmission`, `color`, `price` (text), `options` (array), `image_url`, `image_path`, `bg` (gradient CSS), `is_featured`, `is_available`, `sort_order`.
+
+#### `admin_users`
+Controle de acesso admin. Vinculado a `auth.users`. Campo `is_admin: boolean`.
+
+#### `leads`
+Leads do CRM. Campos: `name`, `phone`, `email`, `vehicle_label`, `status` (`novo | contato | proposta | fechado | perdido`), `source` (`whatsapp | site | indicacao | instagram | outro`), `notes`.
+
+#### `sales`
+Registro de vendas. Campos: `make`, `model`, `year`, `client_name`, `sale_price`, `cost_price`, `commission`, `payment_method` (`a_vista | financiado | consorcio | troca`), `sale_date`, `lead_id` (FK opcional).
+
+### RLS (Row Level Security)
+
+| Tabela | Acesso |
+|--------|--------|
+| `vehicles` | Leitura pública (`is_available = true`), escrita só admin |
+| `admin_users` | Só admin ou o próprio usuário |
+| `leads` | Só admin |
+| `sales` | Só admin |
+
+### Storage
+
+Bucket `vehicles` (público): fotos de veículos. Upload/update/delete só admin.
+
+---
+
+## Autenticação
+
+Login via Supabase Auth (`signInWithPassword`). Admin é verificado pela tabela `admin_users` — ter conta não é suficiente, precisa ter `is_admin = true`.
+
+Para criar o primeiro admin no Supabase SQL Editor:
 
 ```sql
--- 1. Criar usuário no Supabase Auth (via dashboard ou API)
--- 2. Inserir na tabela admin_users:
-INSERT INTO admin_users (user_id, is_admin)
-VALUES ('<uuid-do-user>', true);
+-- 1. Criar usuário via Authentication > Users no dashboard Supabase
+-- 2. Copiar o UUID e rodar:
+insert into public.admin_users (user_id, email, is_admin)
+values ('<UUID>', 'seu@email.com', true);
 ```
 
-## Banco de dados
+---
 
-Tabelas principais: `vehicles`, `leads`, `sales`, `admin_users`.
+## Páginas do Admin
 
-RLS habilitado em todas as tabelas. Políticas de escrita usam:
-```sql
-EXISTS (SELECT 1 FROM admin_users WHERE user_id = auth.uid() AND is_admin = true)
-```
+### Dashboard (`/admin`)
+- 3 KPIs reais: total de veículos, disponíveis, destaques
+- 2 KPIs mock: vendas no mês, leads ativos
+- Gráficos mock: receita por mês, lucro por mês, leads por status, vendas recentes
 
-Bucket Storage: `vehicles` (público para leitura, escrita restrita a admins).
+### Veículos (`/admin/veiculos`)
+- CRUD completo com upload de foto para Supabase Storage
+- Expandable rows com formulário de edição inline
+- Campos: marca, modelo, ano, preço, km, combustível, câmbio, cor, opcionais, destaque, disponível
 
-## Deploy
+### CRM (`/admin/crm`)
+- Cadastro de leads com formulário expansível
+- Filtros por status com contadores
+- Lista de leads com click-to-select
+- Painel de detalhe com edição de status + exclusão
+- Dados reais do Supabase
 
-Projeto configurado para deploy na Vercel. Configurar as variáveis de ambiente no dashboard antes do primeiro deploy.
+### Vendas (`/admin/vendas`)
+- KPIs calculados de vendas reais: total vendido, receita, lucro, ticket médio
+- Registro de venda com formulário expansível
+- Tabela de histórico com edição inline e exclusão
+- Dados reais do Supabase
+
+### Financeiro (`/admin/financeiro`)
+- KPIs calculados de vendas reais: receita, custos, lucro, margem %, ticket médio
+- Gráficos agrupados por mês (gerados dinamicamente das vendas reais)
+- Tabela das 10 últimas vendas
+- Dados reais do Supabase
+
+---
+
+## O que falta fazer
+
+### Alta prioridade
+
+- [ ] **Dashboard KPIs reais** — "Vendas no Mês", "Leads Ativos" e "Receita Mensal" ainda são valores mock hardcoded em `app/admin/page.tsx`. Conectar ao Supabase contando `sales` e `leads` do mês corrente.
+
+- [ ] **Dashboard gráficos reais** — `components/dashboard-charts.tsx` usa dados mock. Substituir pelos dados reais de `sales` e `leads`.
+
+- [ ] **Upload de múltiplas fotos** — Hoje o veículo suporta apenas uma foto (`image_url`). A tabela `vehicle_images` já existe no schema mas não está sendo usada. Implementar galeria com upload múltiplo.
+
+- [ ] **Página do veículo** (`/veiculos/[id]`) — O showroom lista os carros mas não tem página de detalhe individual com galeria completa, especificações e botão de WhatsApp.
+
+### Média prioridade
+
+- [ ] **Tabela de saídas financeiras** — Criar tabela `expenses` no Supabase (aluguel, folha, manutenção, marketing) e conectar ao Financeiro para mostrar custos reais além do custo de aquisição dos veículos.
+
+- [ ] **Vincular venda ao veículo** — Ao registrar uma venda em `/admin/vendas`, poder selecionar um veículo do estoque (por `vehicle_id`) e marcá-lo automaticamente como `is_available = false`.
+
+- [ ] **Vincular venda ao lead** — Campo `lead_id` em `sales` já existe mas não está exposto no formulário. Adicionar select de lead ativo ao criar venda.
+
+- [ ] **Filtro e busca em veículos** — A tabela de estoque não tem busca/filtro. Com muitos veículos fica difícil navegar.
+
+- [ ] **Paginação** — Veículos, leads e vendas sem limite de registros. Implementar paginação ou scroll infinito.
+
+### Baixa prioridade
+
+- [ ] **Site público completo** — Página inicial tem o showroom de veículos. Falta: página "Sobre", "Contato", rodapé com redes sociais, SEO básico (metadata por veículo).
+
+- [ ] **Notificações de novo lead** — Enviar WhatsApp ou e-mail quando um novo lead chegar (via Supabase Edge Function + webhook).
+
+- [ ] **Responsivo mobile no admin** — A sidebar some em telas < 768px mas não tem menu hambúrguer alternativo.
+
+- [ ] **Deploy no Vercel** — Projeto ainda não publicado. Configurar `vercel.json` ou `vercel.ts` e fazer push para produção.
+
+- [ ] **Variável `SUPABASE_SERVICE_ROLE_KEY`** — Algumas operações de admin (criar usuário programaticamente, acessar dados fora do RLS) precisam da service role key no servidor.

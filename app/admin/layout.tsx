@@ -1,27 +1,19 @@
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import type { ReactNode } from "react";
+import { Rajdhani } from "next/font/google";
+import { AdminSidebar } from "@/components/admin-sidebar";
 
-export default async function AdminLayout({ children }: { children: ReactNode }) {
-  const supabase = await createClient();
-  if (!supabase) redirect("/login");
+const rajdhani = Rajdhani({
+  subsets: ["latin"],
+  weight: ["600", "700"],
+  variable: "--font-raj",
+  display: "swap",
+});
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
-
-  const { data: adminUser } = await supabase
-    .from("admin_users")
-    .select("is_admin")
-    .eq("user_id", user.id)
-    .single();
-
-  if (!adminUser?.is_admin) redirect("/login");
-
+export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="admin-theme min-h-screen">
+    <div className={`adm-shell ${rajdhani.variable}`}>
       <AdminSidebar />
-      <main className="ml-60 min-h-screen p-6">{children}</main>
+      <main className="adm-main">{children}</main>
     </div>
   );
 }

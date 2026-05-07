@@ -15,7 +15,7 @@ const leadSchema = z.object({
   email: z.string().trim().email("E-mail inválido").max(120).optional().or(z.literal("")),
   vehicle_id: z.string().uuid().optional().or(z.literal("")),
   vehicle_label: z.string().trim().max(200).optional(),
-  status: z.enum(["novo", "contato", "proposta", "fechado", "perdido"]).default("novo"),
+  status: z.enum(["novo", "contato", "em_negociacao", "proposta", "fechado", "perdido"]).default("novo"),
   source: z.enum(["whatsapp", "site", "indicacao", "instagram", "outro"]).default("whatsapp"),
   notes: z.string().trim().max(2000).optional().transform((v) => v || null),
 });

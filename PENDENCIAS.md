@@ -1,107 +1,110 @@
 # Pendências — Henrique Veículos
 
-## 🔴 Bugs conhecidos
-
-### Login — layout quebrado
-O card não centraliza na tela. O CSS usa `display: grid; place-items: center` mas o Tailwind v4 pode estar
-conflitando com o preflight. Investigar com DevTools no Chrome:
-- Inspecionar `<main class="login-page">` e confirmar se `display: grid` está sendo aplicado
-- Se o preflight sobrescreve, encapsular o CSS do login em `@layer components { ... }`
+> Atualizado: 2026-05-07
 
 ---
 
-## 🟡 Funcionalidades incompletas
+## ✅ Resolvido (esta sessão)
 
-### 1. Nav ativa no painel admin
-Os links Estoque / CRM / Financeiro nunca ficam "selected". Precisa ler o pathname no Server Component
-e adicionar a classe `is-active` dinamicamente:
-```tsx
-// app/admin/layout.tsx — adicionar:
-import { headers } from "next/headers";
-const h = await headers();
-const pathname = h.get("x-pathname") ?? "";
-// ou usar: import { usePathname } from "next/navigation" em Client Component
-```
+- **Painel admin reconstruído** do zero (Dashboard, Veículos, Cadastro, CRM, Financeiro, Vendas)
+- **Login funcionando** com Supabase Auth + cookie SSR
+- **RLS corrigido** — todas as políticas do banco (vehicles, leads, sales, storage) usam `EXISTS` inline em vez de `is_admin()` com problema de EXECUTE
+- **Cadastro de veículo** — upload de imagem para bucket `vehicles` funcionando
+- **Venda salva corretamente** — `client_name`, `cost_price` e `commission` estavam fora do schema Zod, agora salvam
+- **CRM troca de status** — `onChange` não funcionava em Server Component; extraído para `LeadStatusSelect` (Client Component)
+- **Status `em_negociacao`** — estava faltando no enum de validação do Zod em `leads.ts`
+- **Heading "DASHBOARD" gigante** — CSS de `legacy/styles.css` vazava para o admin; reset adicionado em `.admin-theme`
+- **Fontes Rajdhani/Orbitron** — carregadas via Google Fonts em `app/layout.tsx`
+- **Storage bucket `vehicles`** — policy de leitura pública adicionada
 
-### 2. Confirmação antes de deletar
-Deletar veículo, lead ou venda não pede confirmação. Adicionar `<dialog>` ou `confirm()` simples.
+---
 
-### 3. Loading state nos formulários
+## 🔴 Bugs / bloqueadores
+
+*(nenhum bloqueador conhecido no momento)*
+
+---
+
+## 🟡 Funcionalidades faltando
+
+### 1. Confirmação antes de deletar
+Deletar veículo, lead ou venda não pede confirmação — um clique acidental apaga tudo.
+Implementar `<ConfirmButton>` (Client Component) com `window.confirm()` simples ou um `<dialog>`.
+
+### 2. Loading state nos formulários
 Nenhum formulário tem spinner/feedback visual enquanto a Server Action executa.
-Criar `<SubmitButton>` com `useFormStatus()`:
 ```tsx
 "use client";
 import { useFormStatus } from "react-dom";
 export function SubmitButton({ label }: { label: string }) {
   const { pending } = useFormStatus();
-  return <button type="submit" disabled={pending}>{pending ? "Aguarde..." : label}</button>;
+  return <button type="submit" disabled={pending}>{pending ? "Salvando..." : label}</button>;
 }
 ```
 
-### 4. Paginação
-- `/admin` (estoque): sem limite, carrega todos os veículos
-- `/admin/crm`: sem limite, carrega todos os leads
-- `/admin/financeiro`: sem limite, carrega todas as vendas
-Adicionar `range()` no Supabase + controles de página simples.
+### 3. Página de edição de veículo
+A lista `/admin/veiculos` tem botão de deletar e toggle de status, mas não tem edição completa.
+Criar `/admin/veiculos/[id]/editar` com formulário pré-preenchido usando `updateVehicleAction`.
 
-### 5. Busca/filtro no estoque admin
-Não há como buscar por marca/modelo na lista de veículos cadastrados.
+### 4. Formulário de novo lead no CRM
+O CRM só lista leads vindos do site. Falta poder cadastrar lead manualmente pelo painel.
+`createLeadAction` já existe em `app/actions/leads.ts` — só precisa de um form no topo da página.
+
+### 5. Paginação
+`/admin/veiculos`, `/admin/crm` e `/admin/financeiro` carregam todos os registros sem limite.
+Adicionar `.range(0, 49)` no Supabase + controles de página simples.
+
+### 6. Busca/filtro no estoque e CRM
+Sem campo de busca na lista de veículos ou leads.
 
 ---
 
-## 🟢 Melhorias de UX / produto
+## 🟢 Melhorias de UX
 
-### 6. Upload de imagem com preview
-O campo de foto no formulário de veículo não mostra preview antes de salvar.
+### 7. Upload de imagem com preview
+O campo de foto no cadastro não mostra preview antes de salvar.
 
-### 7. Ordenação drag-and-drop no estoque
-O campo `sort_order` é numérico manual. Seria melhor ter drag-and-drop para reordenar.
-
-### 8. Dashboard com gráfico de vendas
-A página Financeiro tem KPIs mas não tem gráfico mensal de receita.
-Considerar `recharts` ou `chart.js`.
+### 8. Gráfico mensal de receita
+A página Financeiro tem KPIs mas sem gráfico.
+`recharts` já está instalado — montar `BarChart` por mês.
 
 ### 9. Notificações de novos leads
-Quando um lead é criado pelo site (WhatsApp, formulário), não há alerta no painel.
+Quando um lead entra pelo site, nada avisa no painel. Integrar Supabase Realtime ou webhook para WhatsApp.
 
 ### 10. Relatório de leads por origem
-O CRM registra `source` (WhatsApp, Instagram, etc.) mas não mostra breakdown visual.
+O CRM registra `source` mas não mostra breakdown visual (WhatsApp, Instagram, etc.).
 
 ---
 
 ## 🔧 Dívida técnica
 
-### 11. Página `/veiculo/[id]` usa classes `.modal-*`
-Acoplada ao CSS da home. Criar classes `.vp-*` próprias para desacoplar.
+### 11. Página `/veiculo/[id]` acoplada ao CSS legado
+Usa classes `.modal-*` do CSS da home. Criar classes `.vp-*` próprias para desacoplar.
 
-### 12. Imagens com `<img>` ao invés de `<Image>` do Next.js
-Nenhuma imagem usa o componente otimizado. Substituir para lazy-load e WebP automático.
+### 12. Imagens com `<img>` em vez de `<Image>` do Next.js
+Substituir para lazy-load automático e geração WebP.
 
-### 13. Autenticação: "Lembrar-me" e "Esqueci minha senha"
-Os dois controles existem na tela de login mas não fazem nada.
-- Lembrar-me: Supabase já persiste sessão por padrão — só remover o campo ou wired correctly
-- Esqueci minha senha: implementar `supabase.auth.resetPasswordForEmail(email)`
-
-### 14. Variável de ambiente `SUPABASE_SERVICE_ROLE_KEY` ausente
-Algumas operações futuras (criar admin via script) precisam da service role. Não exposta no `.env.local`.
+### 13. "Esqueci minha senha" no login
+O botão existe mas não faz nada. Implementar:
+```ts
+await supabase.auth.resetPasswordForEmail(email, { redirectTo: "/reset-senha" });
+```
 
 ---
 
 ## 📦 Deploy / infraestrutura
 
-### 15. Vercel — variáveis de ambiente
-Confirmar que as seguintes variáveis estão configuradas no projeto Vercel:
+### 14. Vercel — variáveis de ambiente
+Confirmar no dashboard Vercel que estão configuradas:
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
-### 16. Supabase — migrations em produção
-As migrations em `supabase/migrations/` precisam ser aplicadas no projeto produção (`ejpmvugkxkwbbeokhskk`):
+### 15. Domínio personalizado
+O `metadataBase` aponta para `https://www.henriqueveiculos.com.br`. Configurar DNS apontando para o projeto Vercel.
+
+### 16. Migrations Supabase versionadas
+As migrations aplicadas via MCP nesta sessão não estão em `supabase/migrations/`. Rodar:
 ```bash
-supabase db push --linked
+supabase db pull
 ```
-
-### 17. Storage bucket `vehicles` — policy pública
-Confirmar que o bucket tem política `public read` para URLs de imagem funcionarem no site público.
-
-### 18. Domínio personalizado
-O `metadataBase` aponta para `https://www.henriqueveiculos.com.br`. Configurar DNS no Vercel.
+para sincronizar o histórico local com o banco remoto antes do próximo deploy.

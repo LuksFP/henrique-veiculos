@@ -7,7 +7,6 @@ export async function loginAction(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const supabase = await createClient();
-
   if (!supabase) {
     redirect("/login?error=missing-env");
   }

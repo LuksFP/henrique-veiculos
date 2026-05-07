@@ -12,31 +12,6 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       admin_users: {
@@ -112,6 +87,9 @@ export type Database = {
       }
       sales: {
         Row: {
+          client_name: string
+          commission: number
+          cost_price: number
           created_at: string
           id: string
           lead_id: string | null
@@ -125,6 +103,9 @@ export type Database = {
           year: number
         }
         Insert: {
+          client_name?: string
+          commission?: number
+          cost_price?: number
           created_at?: string
           id?: string
           lead_id?: string | null
@@ -138,6 +119,9 @@ export type Database = {
           year: number
         }
         Update: {
+          client_name?: string
+          commission?: number
+          cost_price?: number
           created_at?: string
           id?: string
           lead_id?: string | null
@@ -364,14 +348,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {},
   },
 } as const
 
-export type VehicleRow = Database["public"]["Tables"]["vehicles"]["Row"];
-export type LeadRow = Database["public"]["Tables"]["leads"]["Row"];
-export type SaleRow = Database["public"]["Tables"]["sales"]["Row"];
+export type VehicleRow = Database["public"]["Tables"]["vehicles"]["Row"]

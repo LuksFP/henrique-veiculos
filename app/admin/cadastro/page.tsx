@@ -1,5 +1,7 @@
 import { createVehicleAction } from "@/app/actions/vehicles";
 import { SubmitButton } from "@/components/admin/SubmitButton";
+import { AlertBanner } from "@/components/admin/AlertBanner";
+import { ImagePreview } from "@/components/admin/ImagePreview";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +16,13 @@ const inputClass = {
   outline: "none",
 } as const;
 
-export default function AdminCadastro() {
+export default async function AdminCadastro({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
+
   return (
     <div>
       <h1
@@ -27,10 +35,14 @@ export default function AdminCadastro() {
         Preencha os dados do novo veículo
       </p>
 
+      <div className="mt-4">
+        <AlertBanner error={error} />
+      </div>
+
       <form
         action={createVehicleAction}
         encType="multipart/form-data"
-        className="mt-6 grid gap-4 rounded-xl p-6 sm:grid-cols-2 lg:grid-cols-3"
+        className="mt-2 grid gap-4 rounded-xl p-6 sm:grid-cols-2 lg:grid-cols-3"
         style={{ border: "1px solid var(--border)", background: "var(--card)" }}
       >
         <div>
@@ -85,13 +97,7 @@ export default function AdminCadastro() {
         </div>
         <div className="sm:col-span-2 lg:col-span-3">
           <label className="mb-1.5 block text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>Foto do Veículo</label>
-          <input
-            name="image"
-            type="file"
-            accept="image/png,image/jpeg,image/webp,image/avif"
-            className="text-sm"
-            style={{ ...inputClass, paddingTop: "0.4rem" }}
-          />
+          <ImagePreview inputStyle={{ ...inputClass, paddingTop: "0.4rem" }} />
         </div>
         <div className="flex items-center gap-6 sm:col-span-2 lg:col-span-3">
           <label className="flex items-center gap-2 cursor-pointer text-sm" style={{ color: "var(--foreground)" }}>

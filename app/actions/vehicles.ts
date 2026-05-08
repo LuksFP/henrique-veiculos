@@ -53,8 +53,8 @@ async function requireAdmin(): Promise<DBClient> {
   return supabase;
 }
 
-function failAdmin(message: string): never {
-  redirect(`/admin?error=${encodeURIComponent(message)}`);
+function failAdmin(message: string, page = "/admin/veiculos"): never {
+  redirect(`${page}?error=${encodeURIComponent(message)}`);
 }
 
 async function uploadVehicleImage(supabase: DBClient, formData: FormData) {
@@ -120,12 +120,12 @@ export async function createVehicleAction(formData: FormData) {
   const { error } = await supabase.from("vehicles").insert({ ...data, ...upload });
   if (error) {
     await removeStorageObject(supabase, upload.image_path);
-    failAdmin(error.message);
+    failAdmin(error.message, "/admin/cadastro");
   }
 
   revalidatePath("/");
-  revalidatePath("/admin");
-  redirect("/admin?success=created");
+  revalidatePath("/admin/veiculos");
+  redirect("/admin/veiculos?success=created");
 }
 
 export async function updateVehicleAction(formData: FormData) {
@@ -155,8 +155,8 @@ export async function updateVehicleAction(formData: FormData) {
   }
 
   revalidatePath("/");
-  revalidatePath("/admin");
-  redirect("/admin?success=updated");
+  revalidatePath("/admin/veiculos");
+  redirect("/admin/veiculos?success=updated");
 }
 
 export async function deleteVehicleAction(formData: FormData) {
@@ -177,6 +177,6 @@ export async function deleteVehicleAction(formData: FormData) {
   await removeStorageObject(supabase, vehicle?.image_path ?? null);
 
   revalidatePath("/");
-  revalidatePath("/admin");
-  redirect("/admin?success=deleted");
+  revalidatePath("/admin/veiculos");
+  redirect("/admin/veiculos?success=deleted");
 }

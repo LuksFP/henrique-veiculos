@@ -2,6 +2,8 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { updateVehicleAction } from "@/app/actions/vehicles";
 import { SubmitButton } from "@/components/admin/SubmitButton";
+import { AlertBanner } from "@/components/admin/AlertBanner";
+import { ImagePreview } from "@/components/admin/ImagePreview";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -20,9 +22,9 @@ const inputClass = {
 export default async function EditarVeiculo({
   searchParams,
 }: {
-  searchParams: Promise<{ id?: string }>;
+  searchParams: Promise<{ id?: string; error?: string }>;
 }) {
-  const { id } = await searchParams;
+  const { id, error } = await searchParams;
   if (!id) redirect("/admin/veiculos");
 
   const supabase = await createClient();
@@ -49,6 +51,10 @@ export default async function EditarVeiculo({
       <p className="mt-1 text-sm" style={{ color: "var(--muted-foreground)" }}>
         {v.make} {v.model} {v.year}
       </p>
+
+      <div className="mt-4">
+        <AlertBanner error={error} />
+      </div>
 
       <form
         action={updateVehicleAction}
@@ -110,28 +116,13 @@ export default async function EditarVeiculo({
           <input name="options" defaultValue={v.options?.join(", ") ?? ""} style={inputClass} />
         </div>
 
-        {/* Foto atual */}
-        {v.image_url && (
-          <div className="sm:col-span-2 lg:col-span-3">
-            <label className="mb-1.5 block text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>Foto atual</label>
-            <img
-              src={v.image_url}
-              alt={`${v.make} ${v.model}`}
-              className="h-32 rounded-lg object-cover"
-            />
-          </div>
-        )}
-
         <div className="sm:col-span-2 lg:col-span-3">
           <label className="mb-1.5 block text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>
-            {v.image_url ? "Nova foto (deixe vazio para manter a atual)" : "Foto do Veículo"}
+            {v.image_url ? "Foto (deixe vazio para manter a atual)" : "Foto do Veículo"}
           </label>
-          <input
-            name="image"
-            type="file"
-            accept="image/png,image/jpeg,image/webp,image/avif"
-            className="text-sm"
-            style={{ ...inputClass, paddingTop: "0.4rem" }}
+          <ImagePreview
+            currentUrl={v.image_url}
+            inputStyle={{ ...inputClass, paddingTop: "0.4rem" }}
           />
         </div>
 

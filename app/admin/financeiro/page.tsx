@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { deleteSaleAction } from "@/app/actions/sales";
+import { DeleteButton } from "@/components/admin/DeleteButton";
 
 export const dynamic = "force-dynamic";
 
@@ -176,16 +177,7 @@ export default async function AdminFinanceiro() {
                   {s.cost_price ? `R$ ${(Number(s.sale_price) - Number(s.cost_price)).toLocaleString("pt-BR")}` : "—"}
                 </td>
                 <td className="px-4 py-3 text-right">
-                  <form action={deleteSaleAction}>
-                    <input type="hidden" name="id" value={s.id} />
-                    <button
-                      type="submit"
-                      className="rounded-md px-2 py-1 text-xs transition-all"
-                      style={{ border: "1px solid var(--border)", color: "oklch(0.58 0.22 27)" }}
-                    >
-                      🗑️
-                    </button>
-                  </form>
+                  <DeleteButton action={deleteSaleAction} id={s.id} />
                 </td>
               </tr>
             ))}

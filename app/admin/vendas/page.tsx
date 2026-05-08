@@ -1,5 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { createSaleAction, deleteSaleAction } from "@/app/actions/sales";
+import { SubmitButton } from "@/components/admin/SubmitButton";
+import { DeleteButton } from "@/components/admin/DeleteButton";
 
 export const dynamic = "force-dynamic";
 
@@ -142,17 +144,16 @@ export default async function AdminVendas() {
             <textarea name="notes" rows={2} placeholder="Observações da venda..." style={{ ...inputClass, minHeight: "64px", resize: "vertical" }} />
           </div>
           <div className="sm:col-span-2 lg:col-span-3">
-            <button
-              type="submit"
+            <SubmitButton
+              label="Salvar Venda"
+              pendingLabel="Salvando..."
               className="rounded-lg px-8 py-3 text-sm font-bold uppercase tracking-wider transition-all neon-glow"
               style={{
                 background: "var(--primary)",
                 color: "var(--primary-foreground)",
                 fontFamily: "Rajdhani, sans-serif",
               }}
-            >
-              Salvar Venda
-            </button>
+            />
           </div>
         </form>
       </div>
@@ -199,16 +200,7 @@ export default async function AdminVendas() {
                   {v.commission ? `R$ ${Number(v.commission).toLocaleString("pt-BR")}` : "—"}
                 </td>
                 <td className="px-4 py-3 text-right">
-                  <form action={deleteSaleAction}>
-                    <input type="hidden" name="id" value={v.id} />
-                    <button
-                      type="submit"
-                      className="rounded-md px-2 py-1 text-xs"
-                      style={{ border: "1px solid var(--border)", color: "oklch(0.58 0.22 27)" }}
-                    >
-                      🗑️
-                    </button>
-                  </form>
+                  <DeleteButton action={deleteSaleAction} id={v.id} />
                 </td>
               </tr>
             ))}

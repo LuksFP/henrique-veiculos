@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
-import { deleteLeadAction } from "@/app/actions/leads";
+import { deleteLeadAction, createLeadAction } from "@/app/actions/leads";
 import { LeadStatusSelect } from "@/components/admin/LeadStatusSelect";
+import { DeleteButton } from "@/components/admin/DeleteButton";
+import { SubmitButton } from "@/components/admin/SubmitButton";
 
 export const dynamic = "force-dynamic";
 
@@ -22,12 +24,22 @@ const statusStyle: Record<string, { background: string; color: string }> = {
   perdido: { background: "oklch(0.58 0.22 27 / 10%)", color: "oklch(0.58 0.22 27)" },
 };
 
+const inputClass = {
+  width: "100%",
+  borderRadius: "0.5rem",
+  border: "1px solid var(--input)",
+  background: "var(--input)",
+  color: "var(--foreground)",
+  padding: "0.5rem 0.75rem",
+  fontSize: "0.875rem",
+} as const;
+
 export default async function AdminCRM() {
   const supabase = await createClient();
-  const { data: leads } = await supabase!
-    .from("leads")
-    .select("*")
-    .order("created_at", { ascending: false });
+  const [{ data: leads }, { data: vehicles }] = await Promise.all([
+    supabase!.from("leads").select("*").order("created_at", { ascending: false }),
+    supabase!.from("vehicles").select("id, make, model, year").eq("is_available", true),
+  ]);
 
   const all = leads ?? [];
 
@@ -62,6 +74,82 @@ export default async function AdminCRM() {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Novo Lead */}
+      <div
+        className="mt-6 rounded-xl p-5"
+        style={{ border: "1px solid var(--border)", background: "var(--card)" }}
+      >
+        <h3
+          className="mb-4 text-base font-bold"
+          style={{ fontFamily: "Rajdhani, sans-serif", color: "var(--foreground)" }}
+        >
+          Cadastrar Novo Lead
+        </h3>
+        <form action={createLeadAction} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div>
+            <label className="mb-1 block text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>Nome *</label>
+            <input required name="name" placeholder="Nome do cliente" style={inputClass} />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>Telefone *</label>
+            <input required name="phone" placeholder="(13) 99999-9999" style={inputClass} />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>E-mail</label>
+            <input name="email" type="email" placeholder="cliente@email.com" style={inputClass} />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>Origem</label>
+            <select name="source" style={inputClass}>
+              <option value="whatsapp">WhatsApp</option>
+              <option value="site">Site</option>
+              <option value="indicacao">Indicação</option>
+              <option value="instagram">Instagram</option>
+              <option value="outro">Outro</option>
+            </select>
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>Interesse (veículo)</label>
+            <select name="vehicle_id" style={inputClass}>
+              <option value="">— Nenhum —</option>
+              {vehicles?.map((v) => (
+                <option key={v.id} value={v.id}>
+                  {v.make} {v.model} {v.year}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>Interesse (texto livre)</label>
+            <input name="vehicle_label" placeholder="Ex: SUV até R$ 80k" style={inputClass} />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>Status</label>
+            <select name="status" style={inputClass}>
+              {Object.entries(statusLabels).map(([v, label]) => (
+                <option key={v} value={v}>{label}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>Observações</label>
+            <input name="notes" placeholder="Anotações..." style={inputClass} />
+          </div>
+          <div className="sm:col-span-2 lg:col-span-4">
+            <SubmitButton
+              label="Cadastrar Lead"
+              pendingLabel="Salvando..."
+              className="rounded-lg px-6 py-2.5 text-sm font-bold uppercase tracking-wider transition-all neon-glow"
+              style={{
+                background: "var(--primary)",
+                color: "var(--primary-foreground)",
+                fontFamily: "Rajdhani, sans-serif",
+              }}
+            />
+          </div>
+        </form>
       </div>
 
       {/* Lead Table */}
@@ -131,16 +219,7 @@ export default async function AdminCRM() {
                       WA
                     </a>
                     <LeadStatusSelect id={l.id} status={l.status} />
-                    <form action={deleteLeadAction}>
-                      <input type="hidden" name="id" value={l.id} />
-                      <button
-                        type="submit"
-                        className="rounded-md px-2 py-1 text-xs transition-all"
-                        style={{ border: "1px solid var(--border)", color: "oklch(0.58 0.22 27)" }}
-                      >
-                        🗑️
-                      </button>
-                    </form>
+                    <DeleteButton action={deleteLeadAction} id={l.id} />
                   </div>
                 </td>
               </tr>

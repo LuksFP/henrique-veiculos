@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { deleteVehicleAction, updateVehicleAction } from "@/app/actions/vehicles";
+import { DeleteButton } from "@/components/admin/DeleteButton";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -111,6 +112,14 @@ export default async function AdminVeiculos() {
                 </td>
                 <td className={`${cell} text-right`}>
                   <div className="flex items-center justify-end gap-2">
+                    {/* Editar */}
+                    <Link
+                      href={`/admin/veiculos/editar?id=${v.id}`}
+                      className="rounded-md px-2 py-1 text-xs transition-all"
+                      style={{ border: "1px solid var(--border)", color: "var(--muted-foreground)" }}
+                    >
+                      ✏️
+                    </Link>
                     {/* Toggle destaque */}
                     <form action={async () => {
                       "use server";
@@ -122,8 +131,8 @@ export default async function AdminVeiculos() {
                       <button
                         type="submit"
                         className="rounded-md px-2 py-1 text-xs transition-all"
-                        style={{ border: "1px solid var(--border)", color: "var(--muted-foreground)" }}
-                        title="Destaque"
+                        style={{ border: "1px solid var(--border)", color: v.is_featured ? "var(--primary)" : "var(--muted-foreground)" }}
+                        title="Toggle destaque"
                       >
                         ⭐
                       </button>
@@ -145,16 +154,7 @@ export default async function AdminVeiculos() {
                       </button>
                     </form>
                     {/* Deletar */}
-                    <form action={deleteVehicleAction}>
-                      <input type="hidden" name="id" value={v.id} />
-                      <button
-                        type="submit"
-                        className="rounded-md px-2 py-1 text-xs transition-all"
-                        style={{ border: "1px solid var(--border)", color: "oklch(0.58 0.22 27)" }}
-                      >
-                        🗑️
-                      </button>
-                    </form>
+                    <DeleteButton action={deleteVehicleAction} id={v.id} />
                   </div>
                 </td>
               </tr>

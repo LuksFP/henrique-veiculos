@@ -63,11 +63,12 @@ app/
   login/page.tsx            → Login admin
   admin/
     layout.tsx              → Shell com sidebar fixa (240px)
+    loading.tsx             → Barra de loading animada (lime) para todas as rotas admin
     page.tsx                → Dashboard (KPIs + gráficos)
     veiculos/page.tsx       → CRUD de veículos + upload de foto
     crm/page.tsx            → Gestão de leads
     vendas/page.tsx         → Histórico de vendas com CRUD
-    financeiro/page.tsx     → KPIs financeiros + gráficos por mês
+    financeiro/page.tsx     → Ganhos semanais/mensais + despesas operacionais
 
 components/
   admin-sidebar.tsx         → Sidebar com navegação ativa
@@ -96,6 +97,7 @@ lib/
   supabase/server.ts        → Cliente Supabase para Server Components
   supabase/browser.ts       → Cliente Supabase para Client Components
   database.types.ts         → Tipos gerados: VehicleRow, LeadRow, SaleRow
+  fmt.ts                    → Utilitários compartilhados: formatCurrency, pad, toISO, MONTH_LABELS
   vehicles.ts               → getVehicles() com fallback estático
 
 supabase/migrations/

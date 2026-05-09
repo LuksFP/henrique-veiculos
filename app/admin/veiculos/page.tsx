@@ -4,8 +4,6 @@ import { VehiclesTable } from "@/components/vehicles-table";
 import { requireAdmin } from "@/lib/admin";
 import type { VehicleImageRow, VehicleRow } from "@/lib/database.types";
 
-export const dynamic = "force-dynamic";
-
 type VehicleWithImages = VehicleRow & { vehicle_images: VehicleImageRow[] };
 
 async function getVehicles(): Promise<VehicleWithImages[]> {

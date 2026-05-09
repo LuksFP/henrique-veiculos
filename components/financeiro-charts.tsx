@@ -4,6 +4,7 @@ import {
   BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
 import type { SaleRow } from "@/lib/database.types";
+import { MONTH_LABELS, pad, toISO } from "@/lib/fmt";
 
 const tooltipStyle = {
   background: "oklch(0.17 0.008 260)",
@@ -12,9 +13,6 @@ const tooltipStyle = {
   color: "oklch(0.97 0.005 260)",
 };
 
-const MONTHS = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
-const pad = (n: number) => String(n).padStart(2, "0");
-const toISO = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 const fmtK = (v: number | string) => `R$ ${(Number(v) / 1000).toFixed(0)}k`;
 
 function buildWeeklyData(sales: SaleRow[]) {
@@ -53,7 +51,7 @@ function buildMonthlyData(sales: SaleRow[]) {
     const m = sales.filter((v) => v.sale_date.startsWith(prefix));
     const receita = m.reduce((sum, v) => sum + Number(v.sale_price), 0);
     const lucro = m.reduce((sum, v) => sum + Number(v.sale_price) - Number(v.cost_price), 0);
-    return { mes: MONTHS[d.getMonth()], receita, lucro, vendas: m.length, isCurrent: monthsBack === 0 };
+    return { mes: MONTH_LABELS[d.getMonth()], receita, lucro, vendas: m.length, isCurrent: monthsBack === 0 };
   });
 }
 

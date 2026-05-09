@@ -1,10 +1,9 @@
-export const dynamic = "force-dynamic";
-
 import { requireAdmin } from "@/lib/admin";
 import { DashboardCharts } from "@/components/dashboard-charts";
 import type { MonthlyData, LeadStatusData, RecentSale } from "@/components/dashboard-charts";
 
-const MONTH_LABELS = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+import { MONTH_LABELS, formatCurrency } from "@/lib/fmt";
+
 const STATUS_LABELS: Record<string, string> = {
   novo: "Novo",
   contato: "Contato",
@@ -96,11 +95,6 @@ async function getDashboardData() {
   };
 }
 
-function formatCurrency(value: number) {
-  if (value >= 1_000_000) return `R$ ${(value / 1_000_000).toFixed(2)}M`;
-  if (value >= 1_000) return `R$ ${(value / 1_000).toFixed(0)}k`;
-  return `R$ ${value.toLocaleString("pt-BR")}`;
-}
 
 export default async function AdminDashboard() {
   const {

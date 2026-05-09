@@ -1,9 +1,8 @@
-export const dynamic = "force-dynamic";
-
-import { Plus, Save, Trash2 } from "lucide-react";
+﻿import { Plus, Save, Trash2 } from "lucide-react";
 import { requireAdmin } from "@/lib/admin";
 import { createSaleAction, updateSaleAction, deleteSaleAction } from "@/app/actions/sales";
 import type { SaleRow, VehicleRow, LeadRow } from "@/lib/database.types";
+import { formatCurrency } from "@/lib/fmt";
 
 const PAGE_SIZE = 25;
 
@@ -88,19 +87,19 @@ function Fields({
         <input className="adm-input" name="sale_price" type="number" step="0.01" defaultValue={s?.sale_price ?? ""} required placeholder="89900" />
       </div>
       <div className="adm-field">
-        <label className="adm-label">Custo de Aquisição (R$)</label>
+        <label className="adm-label">Custo de AquisiÃ§Ã£o (R$)</label>
         <input className="adm-input" name="cost_price" type="number" step="0.01" defaultValue={s?.cost_price ?? 0} placeholder="75000" />
       </div>
       <div className="adm-field">
-        <label className="adm-label">Comissão (R$)</label>
+        <label className="adm-label">ComissÃ£o (R$)</label>
         <input className="adm-input" name="commission" type="number" step="0.01" defaultValue={s?.commission ?? 0} placeholder="900" />
       </div>
       <div className="adm-field">
         <label className="adm-label">Forma de Pagamento</label>
         <select className="adm-input" name="payment_method" defaultValue={s?.payment_method ?? "a_vista"}>
-          <option value="a_vista">À Vista</option>
+          <option value="a_vista">Ã€ Vista</option>
           <option value="financiado">Financiado</option>
-          <option value="consorcio">Consórcio</option>
+          <option value="consorcio">ConsÃ³rcio</option>
           <option value="troca">Troca</option>
         </select>
       </div>
@@ -114,9 +113,9 @@ function Fields({
         />
       </div>
       <div className="adm-field">
-        <label className="adm-label">Veículo do Estoque</label>
+        <label className="adm-label">VeÃ­culo do Estoque</label>
         <select className="adm-input" name="vehicle_id" defaultValue={s?.vehicle_id ?? ""}>
-          <option value="">— Nenhum —</option>
+          <option value="">â€” Nenhum â€”</option>
           {availableVehicles.map((v) => (
             <option key={v.id} value={v.id}>
               {v.make} {v.model} {v.year}
@@ -128,31 +127,31 @@ function Fields({
       <div className="adm-field">
         <label className="adm-label">Lead Vinculado</label>
         <select className="adm-input" name="lead_id" defaultValue={s?.lead_id ?? ""}>
-          <option value="">— Nenhum —</option>
+          <option value="">â€” Nenhum â€”</option>
           {leads.map((l) => (
             <option key={l.id} value={l.id}>{l.name}</option>
           ))}
         </select>
       </div>
       <div className="adm-field adm-field--wide">
-        <label className="adm-label">Observações</label>
-        <textarea className="adm-input adm-textarea" name="notes" defaultValue={s?.notes ?? ""} placeholder="Anotações da venda..." />
+        <label className="adm-label">ObservaÃ§Ãµes</label>
+        <textarea className="adm-input adm-textarea" name="notes" defaultValue={s?.notes ?? ""} placeholder="AnotaÃ§Ãµes da venda..." />
       </div>
     </>
   );
 }
 
 const paymentLabel: Record<SaleRow["payment_method"], string> = {
-  a_vista: "À Vista",
+  a_vista: "Ã€ Vista",
   financiado: "Financiado",
-  consorcio: "Consórcio",
+  consorcio: "ConsÃ³rcio",
   troca: "Troca",
 };
 
 const OK: Record<string, string> = {
   created: "Venda registrada.",
   updated: "Venda atualizada.",
-  deleted: "Venda excluída.",
+  deleted: "Venda excluÃ­da.",
 };
 
 export default async function VendasPage({
@@ -166,11 +165,7 @@ export default async function VendasPage({
 
   const ticketMedio = totalCount > 0 ? Math.round(kpi.receita / totalCount) : 0;
 
-  function fmt(v: number) {
-    if (v >= 1_000_000) return `R$ ${(v / 1_000_000).toFixed(2)}M`;
-    if (v >= 1_000) return `R$ ${(v / 1_000).toFixed(0)}k`;
-    return `R$ ${v.toLocaleString("pt-BR")}`;
-  }
+  const fmt = formatCurrency;
 
   return (
     <>
@@ -186,31 +181,31 @@ export default async function VendasPage({
 
       <div className="dash-kpis" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
         <div className="dash-kpi">
-          <div className="dash-kpi-icon">🚗</div>
+          <div className="dash-kpi-icon">ðŸš—</div>
           <div className="dash-kpi-value">{totalCount}</div>
-          <div className="dash-kpi-label">Veículos Vendidos</div>
+          <div className="dash-kpi-label">VeÃ­culos Vendidos</div>
         </div>
         <div className="dash-kpi">
-          <div className="dash-kpi-icon">💵</div>
+          <div className="dash-kpi-icon">ðŸ’µ</div>
           <div className="dash-kpi-value">{fmt(kpi.receita)}</div>
           <div className="dash-kpi-label">Receita Total</div>
         </div>
         <div className="dash-kpi">
-          <div className="dash-kpi-icon">📈</div>
+          <div className="dash-kpi-icon">ðŸ“ˆ</div>
           <div className="dash-kpi-value">{fmt(kpi.lucro)}</div>
           <div className="dash-kpi-label">Lucro Total</div>
         </div>
         <div className="dash-kpi">
-          <div className="dash-kpi-icon">🏷️</div>
+          <div className="dash-kpi-icon">ðŸ·ï¸</div>
           <div className="dash-kpi-value">{fmt(ticketMedio)}</div>
-          <div className="dash-kpi-label">Ticket Médio</div>
+          <div className="dash-kpi-label">Ticket MÃ©dio</div>
         </div>
       </div>
 
       <details className="adm-card adm-form-card">
         <summary className="adm-card-head">
           <h2 className="adm-card-title">Registrar Venda</h2>
-          <span className="adm-card-toggle">›</span>
+          <span className="adm-card-toggle">â€º</span>
         </summary>
         <div className="adm-card-body">
           <form className="adm-form" action={createSaleAction}>
@@ -226,8 +221,8 @@ export default async function VendasPage({
 
       <div className="adm-card">
         <div className="adm-card-head adm-card-head--static">
-          <h3 className="adm-card-title">Histórico</h3>
-          <span className="adm-tag adm-tag--muted">Comissões: R$ {kpi.comissao.toLocaleString("pt-BR")}</span>
+          <h3 className="adm-card-title">HistÃ³rico</h3>
+          <span className="adm-tag adm-tag--muted">ComissÃµes: R$ {kpi.comissao.toLocaleString("pt-BR")}</span>
         </div>
 
         {sales.length === 0 ? (
@@ -235,12 +230,12 @@ export default async function VendasPage({
         ) : (
           <>
             <div className="vend-table-head">
-              <span>Veículo</span>
+              <span>VeÃ­culo</span>
               <span>Cliente</span>
               <span>Data</span>
               <span>Valor</span>
               <span>Lucro</span>
-              <span>Comissão</span>
+              <span>ComissÃ£o</span>
             </div>
             {sales.map((v) => {
               const lucro = Number(v.sale_price) - Number(v.cost_price);
@@ -285,14 +280,14 @@ export default async function VendasPage({
             {totalPages > 1 && (
               <div className="adm-pagination">
                 <span>
-                  {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, totalCount)} de {totalCount}
+                  {(page - 1) * PAGE_SIZE + 1}â€“{Math.min(page * PAGE_SIZE, totalCount)} de {totalCount}
                 </span>
                 <div className="adm-pagination-btns">
                   {page > 1 && (
-                    <a href={`?page=${page - 1}`} className="adm-pagination-btn">← Anterior</a>
+                    <a href={`?page=${page - 1}`} className="adm-pagination-btn">â† Anterior</a>
                   )}
                   {page < totalPages && (
-                    <a href={`?page=${page + 1}`} className="adm-pagination-btn">Próxima →</a>
+                    <a href={`?page=${page + 1}`} className="adm-pagination-btn">PrÃ³xima â†’</a>
                   )}
                 </div>
               </div>

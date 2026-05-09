@@ -5,15 +5,23 @@ import { requireAdmin } from "@/lib/admin";
 import { createSaleAction, updateSaleAction, deleteSaleAction } from "@/app/actions/sales";
 import type { SaleRow, VehicleRow, LeadRow } from "@/lib/database.types";
 
-async function getPageData() {
-  const supabase = await requireAdmin();
+const PAGE_SIZE = 25;
 
-  const [salesRes, vehiclesRes, leadsRes] = await Promise.all([
+async function getPageData(page: number) {
+  const supabase = await requireAdmin();
+  const from = (page - 1) * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
+
+  const [salesRes, kpiRes, vehiclesRes, leadsRes] = await Promise.all([
     supabase
       .from("sales")
       .select("*")
       .order("sale_date", { ascending: false })
-      .order("created_at", { ascending: false }),
+      .order("created_at", { ascending: false })
+      .range(from, to),
+    supabase
+      .from("sales")
+      .select("sale_price, cost_price, commission"),
     supabase
       .from("vehicles")
       .select("id, make, model, year, is_available")
@@ -25,10 +33,20 @@ async function getPageData() {
       .order("name"),
   ]);
 
+  const allSales = kpiRes.data ?? [];
+  const totalCount = allSales.length;
+
   return {
     sales: salesRes.data ?? [],
     vehicles: vehiclesRes.data ?? [],
     leads: leadsRes.data ?? [],
+    totalCount,
+    totalPages: Math.ceil(totalCount / PAGE_SIZE),
+    kpi: {
+      receita: allSales.reduce((s, v) => s + Number(v.sale_price), 0),
+      lucro: allSales.reduce((s, v) => s + Number(v.sale_price) - Number(v.cost_price), 0),
+      comissao: allSales.reduce((s, v) => s + Number(v.commission), 0),
+    },
   };
 }
 
@@ -140,15 +158,13 @@ const OK: Record<string, string> = {
 export default async function VendasPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; success?: string }>;
+  searchParams: Promise<{ error?: string; success?: string; page?: string }>;
 }) {
-  const { sales, vehicles, leads } = await getPageData();
   const params = await searchParams;
+  const page = Math.max(1, parseInt(params.page ?? "1"));
+  const { sales, vehicles, leads, totalCount, totalPages, kpi } = await getPageData(page);
 
-  const totalVendas = sales.reduce((s, v) => s + Number(v.sale_price), 0);
-  const totalLucro = sales.reduce((s, v) => s + (Number(v.sale_price) - Number(v.cost_price)), 0);
-  const totalComissao = sales.reduce((s, v) => s + Number(v.commission), 0);
-  const ticketMedio = sales.length > 0 ? Math.round(totalVendas / sales.length) : 0;
+  const ticketMedio = totalCount > 0 ? Math.round(kpi.receita / totalCount) : 0;
 
   function fmt(v: number) {
     if (v >= 1_000_000) return `R$ ${(v / 1_000_000).toFixed(2)}M`;
@@ -161,7 +177,7 @@ export default async function VendasPage({
       <div className="adm-page-head">
         <div>
           <h1 className="adm-page-title">Vendas</h1>
-          <p className="adm-page-sub">{sales.length} venda{sales.length !== 1 ? "s" : ""} registrada{sales.length !== 1 ? "s" : ""}</p>
+          <p className="adm-page-sub">{totalCount} venda{totalCount !== 1 ? "s" : ""} registrada{totalCount !== 1 ? "s" : ""}</p>
         </div>
       </div>
 
@@ -171,17 +187,17 @@ export default async function VendasPage({
       <div className="dash-kpis" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
         <div className="dash-kpi">
           <div className="dash-kpi-icon">🚗</div>
-          <div className="dash-kpi-value">{sales.length}</div>
+          <div className="dash-kpi-value">{totalCount}</div>
           <div className="dash-kpi-label">Veículos Vendidos</div>
         </div>
         <div className="dash-kpi">
           <div className="dash-kpi-icon">💵</div>
-          <div className="dash-kpi-value">{fmt(totalVendas)}</div>
+          <div className="dash-kpi-value">{fmt(kpi.receita)}</div>
           <div className="dash-kpi-label">Receita Total</div>
         </div>
         <div className="dash-kpi">
           <div className="dash-kpi-icon">📈</div>
-          <div className="dash-kpi-value">{fmt(totalLucro)}</div>
+          <div className="dash-kpi-value">{fmt(kpi.lucro)}</div>
           <div className="dash-kpi-label">Lucro Total</div>
         </div>
         <div className="dash-kpi">
@@ -211,7 +227,7 @@ export default async function VendasPage({
       <div className="adm-card">
         <div className="adm-card-head adm-card-head--static">
           <h3 className="adm-card-title">Histórico</h3>
-          <span className="adm-tag adm-tag--muted">Comissões: R$ {totalComissao.toLocaleString("pt-BR")}</span>
+          <span className="adm-tag adm-tag--muted">Comissões: R$ {kpi.comissao.toLocaleString("pt-BR")}</span>
         </div>
 
         {sales.length === 0 ? (
@@ -266,6 +282,21 @@ export default async function VendasPage({
                 </details>
               );
             })}
+            {totalPages > 1 && (
+              <div className="adm-pagination">
+                <span>
+                  {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, totalCount)} de {totalCount}
+                </span>
+                <div className="adm-pagination-btns">
+                  {page > 1 && (
+                    <a href={`?page=${page - 1}`} className="adm-pagination-btn">← Anterior</a>
+                  )}
+                  {page < totalPages && (
+                    <a href={`?page=${page + 1}`} className="adm-pagination-btn">Próxima →</a>
+                  )}
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>

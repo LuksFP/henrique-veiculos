@@ -50,11 +50,8 @@ function parsePayload(formData: FormData) {
   return parsed.data;
 }
 
-async function uploadImage(supabase: Awaited<ReturnType<typeof requireAdmin>>, formData: FormData) {
-  const file = formData.get("image");
-  if (!(file instanceof File) || file.size === 0) {
-    return { image_url: null as string | null, image_path: null as string | null };
-  }
+async function uploadImage(supabase: Awaited<ReturnType<typeof requireAdmin>>, file: File) {
+  if (!(file instanceof File) || file.size === 0) return null;
   if (file.size > MAX_IMAGE_BYTES) fail(`Imagem maior que ${MAX_IMAGE_BYTES / 1024 / 1024}MB.`);
   if (!ALLOWED_IMAGE_MIME.includes(file.type)) fail(`Formato inválido: ${file.type}.`);
 
@@ -67,10 +64,10 @@ async function uploadImage(supabase: Awaited<ReturnType<typeof requireAdmin>>, f
   });
   if (error) fail(`Falha ao subir imagem: ${error.message}`);
   const { data: { publicUrl } } = supabase.storage.from("vehicles").getPublicUrl(path);
-  return { image_url: publicUrl, image_path: path };
+  return { url: publicUrl, path };
 }
 
-async function removeImage(supabase: Awaited<ReturnType<typeof requireAdmin>>, path: string | null) {
+async function removeStorageFile(supabase: Awaited<ReturnType<typeof requireAdmin>>, path: string | null) {
   if (!path || path.startsWith("/")) return;
   await supabase.storage.from("vehicles").remove([path]);
 }
@@ -84,10 +81,16 @@ function revalidate() {
 export async function createVehicleAction(formData: FormData) {
   const supabase = await requireAdmin();
   const data = parsePayload(formData);
-  const upload = await uploadImage(supabase, formData);
-  const { error } = await supabase.from("vehicles").insert({ ...data, ...upload });
+  const coverFile = formData.get("image") as File | null;
+  const cover = coverFile ? await uploadImage(supabase, coverFile) : null;
+
+  const { error } = await supabase.from("vehicles").insert({
+    ...data,
+    image_url: cover?.url ?? null,
+    image_path: cover?.path ?? null,
+  });
   if (error) {
-    await removeImage(supabase, upload.image_path);
+    if (cover) await removeStorageFile(supabase, cover.path);
     fail(error.message);
   }
   revalidate();
@@ -101,19 +104,23 @@ export async function updateVehicleAction(formData: FormData) {
 
   const data = parsePayload(formData);
   const currentPath = String(formData.get("current_image_path") ?? "").trim() || null;
-  const upload = await uploadImage(supabase, formData);
-  const replacing = upload.image_path !== null;
+  const coverFile = formData.get("image") as File | null;
+  const cover = coverFile ? await uploadImage(supabase, coverFile) : null;
 
   const { error } = await supabase
     .from("vehicles")
-    .update({ ...data, updated_at: new Date().toISOString(), ...(replacing ? upload : {}) })
+    .update({
+      ...data,
+      updated_at: new Date().toISOString(),
+      ...(cover ? { image_url: cover.url, image_path: cover.path } : {}),
+    })
     .eq("id", id);
 
   if (error) {
-    if (replacing) await removeImage(supabase, upload.image_path);
+    if (cover) await removeStorageFile(supabase, cover.path);
     fail(error.message);
   }
-  if (replacing && currentPath) await removeImage(supabase, currentPath);
+  if (cover && currentPath) await removeStorageFile(supabase, currentPath);
 
   revalidate();
   redirect("/admin/veiculos?success=updated");
@@ -124,13 +131,74 @@ export async function deleteVehicleAction(formData: FormData) {
   const id = String(formData.get("id") ?? "").trim();
   if (!id) fail("ID do veículo ausente.");
 
-  const { data: vehicle } = await supabase
-    .from("vehicles").select("image_path").eq("id", id).maybeSingle();
+  const [vehicleRes, galleryRes] = await Promise.all([
+    supabase.from("vehicles").select("image_path").eq("id", id).maybeSingle(),
+    supabase.from("vehicle_images").select("path").eq("vehicle_id", id),
+  ]);
 
   const { error } = await supabase.from("vehicles").delete().eq("id", id);
   if (error) fail(error.message);
 
-  await removeImage(supabase, vehicle?.image_path ?? null);
+  const paths = [
+    vehicleRes.data?.image_path,
+    ...(galleryRes.data ?? []).map((img) => img.path),
+  ].filter((p): p is string => !!p && !p.startsWith("/"));
+
+  if (paths.length > 0) {
+    await supabase.storage.from("vehicles").remove(paths);
+  }
+
   revalidate();
   redirect("/admin/veiculos?success=deleted");
+}
+
+export async function addVehicleImagesAction(formData: FormData) {
+  const supabase = await requireAdmin();
+  const vehicleId = String(formData.get("vehicle_id") ?? "").trim();
+  if (!vehicleId) fail("ID do veículo ausente.");
+
+  const files = formData.getAll("images") as File[];
+  const uploaded: { url: string; path: string }[] = [];
+
+  for (const file of files) {
+    if (!(file instanceof File) || file.size === 0) continue;
+    const result = await uploadImage(supabase, file);
+    if (result) uploaded.push(result);
+  }
+
+  if (uploaded.length > 0) {
+    const { error } = await supabase.from("vehicle_images").insert(
+      uploaded.map((img, i) => ({
+        vehicle_id: vehicleId,
+        url: img.url,
+        path: img.path,
+        sort_order: i,
+      })),
+    );
+    if (error) {
+      await supabase.storage.from("vehicles").remove(uploaded.map((u) => u.path));
+      fail(error.message);
+    }
+  }
+
+  revalidate();
+  revalidatePath(`/veiculo/${vehicleId}`);
+  redirect("/admin/veiculos?success=updated");
+}
+
+export async function deleteVehicleImageAction(formData: FormData) {
+  const supabase = await requireAdmin();
+  const id = String(formData.get("id") ?? "").trim();
+  const path = String(formData.get("path") ?? "").trim();
+  const vehicleId = String(formData.get("vehicle_id") ?? "").trim();
+  if (!id) fail("ID da imagem ausente.");
+
+  const { error } = await supabase.from("vehicle_images").delete().eq("id", id);
+  if (error) fail(error.message);
+
+  await removeStorageFile(supabase, path || null);
+
+  revalidate();
+  if (vehicleId) revalidatePath(`/veiculo/${vehicleId}`);
+  redirect("/admin/veiculos?success=updated");
 }

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { BrandLogo } from "@/components/brand-logo";
 import { WhatsappIcon } from "@/components/social-icons";
 import { ShowroomLogo } from "@/components/showroom-logo";
+import { VehicleGallery } from "@/components/vehicle-gallery";
 import { getVehicleById } from "@/lib/vehicles";
 import { vehicleImage } from "@/lib/vehicle-shared";
 
@@ -60,7 +61,12 @@ export default async function VehiclePage({ params }: Props) {
 
   if (!vehicle) notFound();
 
-  const image = vehicleImage(vehicle);
+  const coverUrl = vehicleImage(vehicle);
+  const galleryImages = [
+    ...(coverUrl ? [{ id: "cover", url: coverUrl }] : []),
+    ...(vehicle.vehicle_images ?? []),
+  ];
+
   const whatsappUrl = `${WHATSAPP_BASE}${encodeURIComponent(`${vehicle.make} ${vehicle.model} ${vehicle.year}`)}`;
   const financingUrl = `${whatsappUrl}%20-%20Quero%20simular%20financiamento`;
 
@@ -89,13 +95,21 @@ export default async function VehiclePage({ params }: Props) {
 
       <main className="vp-main">
         <article className="vp-card">
-          <div className="modal-gallery vp-gallery">
-            {image ? (
-              <img src={image} alt={`${vehicle.make} ${vehicle.model}`} />
+          <div className="vp-gallery">
+            {galleryImages.length > 0 ? (
+              <VehicleGallery
+                images={galleryImages}
+                alt={`${vehicle.make} ${vehicle.model}`}
+                year={vehicle.year}
+              />
             ) : (
-              <ShowroomLogo />
+              <div className="vp-gallery-wrap">
+                <div className="vp-gallery-main">
+                  <ShowroomLogo />
+                  <span className="year-badge">{vehicle.year}</span>
+                </div>
+              </div>
             )}
-            <span className="year-badge">{vehicle.year}</span>
           </div>
 
           <div className="modal-info">

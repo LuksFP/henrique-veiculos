@@ -15,6 +15,7 @@ Sistema de gestão para concessionária. Next.js 16 App Router + Supabase + desi
 | Gráficos | Recharts (Bar, Line, Area, Pie) |
 | Validação | Zod |
 | Ícones | Lucide React |
+| Testes E2E | Playwright (Chromium) |
 
 ---
 
@@ -34,6 +35,14 @@ npm run dev
 Acesse `http://localhost:3000`.
 
 > Sem o `.env.local` o app usa fallback de dados estáticos no showroom público. O admin redireciona para `/login`.
+
+### Rodar testes E2E
+
+```bash
+npm run test:e2e
+```
+
+Requer o servidor em `localhost:3000` (o Playwright sobe automaticamente via `webServer`). Usuário de teste: `admin.teste@henriqueveiculos.local`.
 
 ---
 
@@ -64,13 +73,24 @@ components/
   admin-sidebar.tsx         → Sidebar com navegação ativa
   dashboard-charts.tsx      → Gráficos do dashboard (mock)
   crm-client.tsx            → Client component: filtros + painel de lead
-  financeiro-charts.tsx     → Client component: gráficos mensais
+  financeiro-charts.tsx     → Client component: gráficos semanais/mensais de vendas
+  vehicles-table.tsx        → Client component: tabela com busca/filtro de veículos
+  vehicle-gallery.tsx       → Galeria de fotos (múltiplas imagens por veículo)
 
 app/actions/
   auth.ts                   → loginAction, logoutAction
   vehicles.ts               → createVehicleAction, updateVehicleAction, deleteVehicleAction
   leads.ts                  → createLeadAction, updateLeadAction, deleteLeadAction
   sales.ts                  → createSaleAction, updateSaleAction, deleteSaleAction
+  expenses.ts               → createExpenseAction, deleteExpenseAction
+
+e2e/
+  helpers/auth.ts           → login() helper e credenciais do usuário de teste
+  auth.spec.ts              → 3 testes: login, senha errada, logout
+  veiculos.spec.ts          → 4 testes: criar, busca filtra, busca vazia, editar
+  crm.spec.ts               → 5 testes: criar, filtro status, selecionar, mudar status, excluir
+  vendas.spec.ts            → 3 testes: criar, editar, excluir
+  financeiro.spec.ts        → 2 testes: criar despesa, excluir despesa
 
 lib/
   supabase/server.ts        → Cliente Supabase para Server Components
@@ -79,11 +99,13 @@ lib/
   vehicles.ts               → getVehicles() com fallback estático
 
 supabase/migrations/
-  20260429190000_core_schema.sql      → vehicles, vehicle_images, profiles
-  20260429190100_rls_policies.sql     → RLS para vehicles/profiles
-  20260429190200_storage_bucket.sql   → Bucket vehicle-photos
-  20260429201000_initial_schema.sql   → Schema completo com admin_users
+  20260429190000_core_schema.sql           → vehicles, vehicle_images, profiles
+  20260429190100_rls_policies.sql          → RLS para vehicles/profiles
+  20260429190200_storage_bucket.sql        → Bucket vehicle-photos
+  20260429201000_initial_schema.sql        → Schema completo com admin_users
   20260506000000_sales_cost_commission.sql → cost_price, commission, client_name em sales
+  20260509000000_vehicle_images_gallery.sql → Tabela vehicle_images para galeria múltipla
+  20260509000100_expenses_table.sql        → Tabela expenses (despesas operacionais)
 ```
 
 ---
@@ -160,9 +182,10 @@ values ('<UUID>', 'seu@email.com', true);
 - Dados reais do Supabase
 
 ### Financeiro (`/admin/financeiro`)
-- KPIs calculados de vendas reais: receita, custos, lucro, margem %, ticket médio
-- Gráficos agrupados por mês (gerados dinamicamente das vendas reais)
-- Tabela das 10 últimas vendas
+- Cards de comparação: Esta Semana vs semana anterior, Este Mês vs mês anterior (delta ↑/↓ %)
+- KPIs totais: receita, vendas totais, ticket médio
+- Gráficos de barras: últimas 8 semanas e últimos 6 meses (período atual destacado)
+- Tabela de despesas com CRUD (aluguel, marketing, manutenção, etc.)
 - Dados reais do Supabase
 
 ---
@@ -175,29 +198,15 @@ values ('<UUID>', 'seu@email.com', true);
 
 - [ ] **Dashboard gráficos reais** — `components/dashboard-charts.tsx` usa dados mock. Substituir pelos dados reais de `sales` e `leads`.
 
-- [ ] **Upload de múltiplas fotos** — Hoje o veículo suporta apenas uma foto (`image_url`). A tabela `vehicle_images` já existe no schema mas não está sendo usada. Implementar galeria com upload múltiplo.
-
-- [ ] **Página do veículo** (`/veiculos/[id]`) — O showroom lista os carros mas não tem página de detalhe individual com galeria completa, especificações e botão de WhatsApp.
-
 ### Média prioridade
-
-- [ ] **Tabela de saídas financeiras** — Criar tabela `expenses` no Supabase (aluguel, folha, manutenção, marketing) e conectar ao Financeiro para mostrar custos reais além do custo de aquisição dos veículos.
-
-- [ ] **Vincular venda ao veículo** — Ao registrar uma venda em `/admin/vendas`, poder selecionar um veículo do estoque (por `vehicle_id`) e marcá-lo automaticamente como `is_available = false`.
-
-- [ ] **Vincular venda ao lead** — Campo `lead_id` em `sales` já existe mas não está exposto no formulário. Adicionar select de lead ativo ao criar venda.
-
-- [ ] **Filtro e busca em veículos** — A tabela de estoque não tem busca/filtro. Com muitos veículos fica difícil navegar.
-
-- [ ] **Paginação** — Veículos, leads e vendas sem limite de registros. Implementar paginação ou scroll infinito.
-
-### Baixa prioridade
 
 - [ ] **Site público completo** — Página inicial tem o showroom de veículos. Falta: página "Sobre", "Contato", rodapé com redes sociais, SEO básico (metadata por veículo).
 
 - [ ] **Notificações de novo lead** — Enviar WhatsApp ou e-mail quando um novo lead chegar (via Supabase Edge Function + webhook).
 
 - [ ] **Responsivo mobile no admin** — A sidebar some em telas < 768px mas não tem menu hambúrguer alternativo.
+
+### Baixa prioridade
 
 - [ ] **Deploy no Vercel** — Projeto ainda não publicado. Configurar `vercel.json` ou `vercel.ts` e fazer push para produção.
 

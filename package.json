@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "supabase:types": "supabase gen types typescript --linked > lib/database.types.ts",
     "admin:create": "node scripts/create-admin.mjs",
-    "images:migrate": "node scripts/upload-current-vehicle-images.mjs"
+    "images:migrate": "node scripts/upload-current-vehicle-images.mjs",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.2",
@@ -28,5 +29,8 @@
     "tailwindcss": "^4.2.4",
     "typescript": "^6.0.3",
     "zod": "^4.4.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1"
   }
 }

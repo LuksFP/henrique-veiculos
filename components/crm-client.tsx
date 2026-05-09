@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+const PAGE_SIZE = 25;
 import { Phone, Mail, Car, Calendar, X, Save, Trash2 } from "lucide-react";
 import type { LeadRow } from "@/lib/database.types";
 import { updateLeadAction, deleteLeadAction } from "@/app/actions/leads";
@@ -41,8 +43,15 @@ export function CrmClient({ leads }: { leads: LeadRow[] }) {
   const [filter, setFilter] = useState<FilterKey>("todos");
   const [selected, setSelected] = useState<LeadRow | null>(null);
   const [editStatus, setEditStatus] = useState<Status>("novo");
+  const [page, setPage] = useState(1);
 
-  const filtered = filter === "todos" ? leads : leads.filter((l) => l.status === filter);
+  const filteredAll = filter === "todos" ? leads : leads.filter((l) => l.status === filter);
+  useEffect(() => { setPage(1); setSelected(null); }, [filter]);
+
+  const totalPages = Math.ceil(filteredAll.length / PAGE_SIZE);
+  const filtered = filteredAll.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const from = (page - 1) * PAGE_SIZE + 1;
+  const to = Math.min(page * PAGE_SIZE, filteredAll.length);
 
   function countFor(key: FilterKey) {
     return key === "todos" ? leads.length : leads.filter((l) => l.status === key).length;
@@ -71,10 +80,10 @@ export function CrmClient({ leads }: { leads: LeadRow[] }) {
       <div className="crm-split">
         <div className="crm-list adm-card">
           <div className="adm-card-head adm-card-head--static">
-            <h3 className="adm-card-title">Leads ({filtered.length})</h3>
+            <h3 className="adm-card-title">Leads ({filteredAll.length})</h3>
           </div>
           <div className="crm-rows">
-            {filtered.length === 0 ? (
+            {filteredAll.length === 0 ? (
               <p className="adm-empty">Nenhum lead encontrado.</p>
             ) : (
               filtered.map((lead) => (
@@ -93,6 +102,15 @@ export function CrmClient({ leads }: { leads: LeadRow[] }) {
               ))
             )}
           </div>
+          {totalPages > 1 && (
+            <div className="adm-pagination">
+              <span>{from}–{to} de {filteredAll.length}</span>
+              <div className="adm-pagination-btns">
+                <button className="adm-pagination-btn" onClick={() => setPage((p) => p - 1)} disabled={page === 1}>← Ant.</button>
+                <button className="adm-pagination-btn" onClick={() => setPage((p) => p + 1)} disabled={page === totalPages}>Próx. →</button>
+              </div>
+            </div>
+          )}
         </div>
 
         {selected ? (

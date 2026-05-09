@@ -1,8 +1,7 @@
 "use client";
 
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  AreaChart, Area, Legend,
+  BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
 import type { SaleRow } from "@/lib/database.types";
 
@@ -13,51 +12,66 @@ const tooltipStyle = {
   color: "oklch(0.97 0.005 260)",
 };
 
+const MONTHS = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+const pad = (n: number) => String(n).padStart(2, "0");
+const toISO = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const fmtK = (v: number | string) => `R$ ${(Number(v) / 1000).toFixed(0)}k`;
+
+function buildWeeklyData(sales: SaleRow[]) {
+  const now = new Date();
+  const daysSinceMonday = (now.getDay() + 6) % 7;
+
+  return Array.from({ length: 8 }, (_, i) => {
+    const weeksBack = 7 - i;
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - daysSinceMonday - weeksBack * 7);
+    weekStart.setHours(0, 0, 0, 0);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+
+    const s = toISO(weekStart);
+    const e = toISO(weekEnd);
+    const w = sales.filter((v) => v.sale_date >= s && v.sale_date <= e);
+    const receita = w.reduce((sum, v) => sum + Number(v.sale_price), 0);
+    const lucro = w.reduce((sum, v) => sum + Number(v.sale_price) - Number(v.cost_price), 0);
+
+    const label =
+      weeksBack === 0 ? "Esta sem."
+      : weeksBack === 1 ? "Ant."
+      : `${pad(weekStart.getDate())}/${pad(weekStart.getMonth() + 1)}`;
+
+    return { semana: label, receita, lucro, vendas: w.length, isCurrent: weeksBack === 0 };
+  });
+}
+
 function buildMonthlyData(sales: SaleRow[]) {
-  const map = new Map<string, { receita: number; custos: number }>();
-
-  for (const s of sales) {
-    const [year, month] = s.sale_date.split("-");
-    const months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
-    const label = `${months[parseInt(month) - 1]}/${String(year).slice(2)}`;
-    const existing = map.get(label) ?? { receita: 0, custos: 0 };
-    map.set(label, {
-      receita: existing.receita + Number(s.sale_price),
-      custos: existing.custos + Number(s.cost_price),
-    });
-  }
-
-  const entries = Array.from(map.entries())
-    .map(([mes, v]) => ({ mes, ...v, lucro: v.receita - v.custos }))
-    .slice(-8);
-
-  const acumulado = entries.reduce<{ mes: string; acumulado: number }[]>((acc, item) => {
-    const prev = acc.length > 0 ? acc[acc.length - 1].acumulado : 0;
-    acc.push({ mes: item.mes, acumulado: prev + item.lucro });
-    return acc;
-  }, []);
-
-  return { monthly: entries, acumulado };
+  const now = new Date();
+  return Array.from({ length: 6 }, (_, i) => {
+    const monthsBack = 5 - i;
+    const d = new Date(now.getFullYear(), now.getMonth() - monthsBack, 1);
+    const prefix = `${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
+    const m = sales.filter((v) => v.sale_date.startsWith(prefix));
+    const receita = m.reduce((sum, v) => sum + Number(v.sale_price), 0);
+    const lucro = m.reduce((sum, v) => sum + Number(v.sale_price) - Number(v.cost_price), 0);
+    return { mes: MONTHS[d.getMonth()], receita, lucro, vendas: m.length, isCurrent: monthsBack === 0 };
+  });
 }
 
 export function FinanceiroCharts({ sales }: { sales: SaleRow[] }) {
-  const { monthly, acumulado } = buildMonthlyData(sales);
+  const weekly = buildWeeklyData(sales);
+  const monthly = buildMonthlyData(sales);
 
-  if (monthly.length === 0) {
+  if (sales.length === 0) {
     return (
       <div className="dash-charts">
-        <div className="dash-card">
-          <h3 className="dash-card-title">Receita vs Custos</h3>
-          <p style={{ color: "oklch(0.45 0.01 260)", fontSize: "0.85rem", padding: "40px 0", textAlign: "center" }}>
-            Sem dados de vendas ainda.
-          </p>
-        </div>
-        <div className="dash-card">
-          <h3 className="dash-card-title">Fluxo de Caixa Acumulado</h3>
-          <p style={{ color: "oklch(0.45 0.01 260)", fontSize: "0.85rem", padding: "40px 0", textAlign: "center" }}>
-            Sem dados de vendas ainda.
-          </p>
-        </div>
+        {["Receita por Semana", "Receita por Mês"].map((title) => (
+          <div key={title} className="dash-card">
+            <h3 className="dash-card-title">{title}</h3>
+            <p style={{ color: "oklch(0.45 0.01 260)", fontSize: "0.85rem", padding: "40px 0", textAlign: "center" }}>
+              Sem dados ainda.
+            </p>
+          </div>
+        ))}
       </div>
     );
   }
@@ -65,36 +79,55 @@ export function FinanceiroCharts({ sales }: { sales: SaleRow[] }) {
   return (
     <div className="dash-charts">
       <div className="dash-card">
-        <h3 className="dash-card-title">Receita vs Custos</h3>
+        <h3 className="dash-card-title">Receita por Semana</h3>
         <ResponsiveContainer width="100%" height={260}>
-          <BarChart data={monthly}>
+          <BarChart data={weekly}>
             <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.28 0.01 260)" />
-            <XAxis dataKey="mes" tick={{ fill: "oklch(0.6 0.02 260)", fontSize: 12 }} />
-            <YAxis tick={{ fill: "oklch(0.6 0.02 260)", fontSize: 12 }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
-            <Tooltip contentStyle={tooltipStyle} formatter={(v) => [`R$ ${(Number(v) / 1000).toFixed(0)}k`]} />
+            <XAxis dataKey="semana" tick={{ fill: "oklch(0.6 0.02 260)", fontSize: 11 }} />
+            <YAxis tick={{ fill: "oklch(0.6 0.02 260)", fontSize: 11 }} tickFormatter={fmtK} />
+            <Tooltip
+              contentStyle={tooltipStyle}
+              formatter={(v, name) => [fmtK(v as number), name === "receita" ? "Receita" : "Lucro"]}
+              labelFormatter={(l) => `Semana: ${l}`}
+            />
             <Legend wrapperStyle={{ color: "oklch(0.6 0.02 260)", fontSize: 12 }} />
-            <Bar dataKey="receita" name="Receita" fill="oklch(0.78 0.22 145)" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="custos" name="Custos" fill="oklch(0.55 0.15 27)" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="receita" name="Receita" radius={[4, 4, 0, 0]}>
+              {weekly.map((entry) => (
+                <Cell key={entry.semana} fill={entry.isCurrent ? "oklch(0.78 0.22 145)" : "oklch(0.78 0.22 145 / 40%)"} />
+              ))}
+            </Bar>
+            <Bar dataKey="lucro" name="Lucro" radius={[4, 4, 0, 0]}>
+              {weekly.map((entry) => (
+                <Cell key={entry.semana} fill={entry.isCurrent ? "oklch(0.85 0.25 125)" : "oklch(0.85 0.25 125 / 40%)"} />
+              ))}
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>
 
       <div className="dash-card">
-        <h3 className="dash-card-title">Fluxo de Caixa Acumulado</h3>
+        <h3 className="dash-card-title">Receita por Mês</h3>
         <ResponsiveContainer width="100%" height={260}>
-          <AreaChart data={acumulado}>
-            <defs>
-              <linearGradient id="gradAcum" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="oklch(0.85 0.25 125)" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="oklch(0.85 0.25 125)" stopOpacity={0} />
-              </linearGradient>
-            </defs>
+          <BarChart data={monthly}>
             <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.28 0.01 260)" />
             <XAxis dataKey="mes" tick={{ fill: "oklch(0.6 0.02 260)", fontSize: 12 }} />
-            <YAxis tick={{ fill: "oklch(0.6 0.02 260)", fontSize: 12 }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
-            <Tooltip contentStyle={tooltipStyle} formatter={(v) => [`R$ ${(Number(v) / 1000).toFixed(0)}k`]} />
-            <Area type="monotone" dataKey="acumulado" name="Acumulado" stroke="oklch(0.85 0.25 125)" strokeWidth={2} fill="url(#gradAcum)" dot={{ fill: "oklch(0.85 0.25 125)" }} />
-          </AreaChart>
+            <YAxis tick={{ fill: "oklch(0.6 0.02 260)", fontSize: 12 }} tickFormatter={fmtK} />
+            <Tooltip
+              contentStyle={tooltipStyle}
+              formatter={(v, name) => [fmtK(v as number), name === "receita" ? "Receita" : "Lucro"]}
+            />
+            <Legend wrapperStyle={{ color: "oklch(0.6 0.02 260)", fontSize: 12 }} />
+            <Bar dataKey="receita" name="Receita" radius={[4, 4, 0, 0]}>
+              {monthly.map((entry) => (
+                <Cell key={entry.mes} fill={entry.isCurrent ? "oklch(0.78 0.22 145)" : "oklch(0.78 0.22 145 / 40%)"} />
+              ))}
+            </Bar>
+            <Bar dataKey="lucro" name="Lucro" radius={[4, 4, 0, 0]}>
+              {monthly.map((entry) => (
+                <Cell key={entry.mes} fill={entry.isCurrent ? "oklch(0.85 0.25 125)" : "oklch(0.85 0.25 125 / 40%)"} />
+              ))}
+            </Bar>
+          </BarChart>
         </ResponsiveContainer>
       </div>
     </div>

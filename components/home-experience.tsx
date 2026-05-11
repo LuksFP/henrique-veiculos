@@ -23,30 +23,14 @@ function VehicleImage({ vehicle }: { vehicle: Vehicle }) {
   return <img src={image} alt={`${vehicle.make} ${vehicle.model}`} loading="lazy" />;
 }
 
-const DEAL_SLIDES: Record<string, number> = {
-  avaliacao: 0,
-  consignacao: 1,
-  financiamento: 2,
-  empresa: 3,
-};
-
 function Header({
   search,
   onSearch,
-  onDealNav,
 }: {
   search: string;
   onSearch: (value: string, shouldScroll?: boolean) => void;
-  onDealNav: (idx: number) => void;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
-
-  function handleDealLink(e: React.MouseEvent<HTMLAnchorElement>, id: string) {
-    e.preventDefault();
-    setMenuOpen(false);
-    document.querySelector(".deal-strip")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    setTimeout(() => onDealNav(DEAL_SLIDES[id]), 400);
-  }
 
   return (
     <header className="site-masthead">
@@ -71,11 +55,11 @@ function Header({
                 Home
               </a>
               <a href="#estoque">Estoque</a>
-              <a href="#avaliacao" onClick={(e) => handleDealLink(e, "avaliacao")}>Avaliação</a>
-              <a href="#consignacao" onClick={(e) => handleDealLink(e, "consignacao")}>Consignação</a>
-              <a href="#financiamento" onClick={(e) => handleDealLink(e, "financiamento")}>Financiamento</a>
-              <a href="#empresa" onClick={(e) => handleDealLink(e, "empresa")}>Empresa</a>
-              <a href="#contato">Contato</a>
+              <a href="/avaliacao">Avaliação</a>
+              <a href="/consignacao">Consignação</a>
+              <a href="/financiamento">Financiamento</a>
+              <a href="/empresa">Empresa</a>
+              <a href="/contato">Contato</a>
             </div>
             <form
               className="nav-search"
@@ -402,7 +386,7 @@ export function HomeExperience({ vehicles }: { vehicles: Vehicle[] }) {
 
   return (
     <>
-      <Header search={search} onSearch={handleSearch} onDealNav={scrollToDeal} />
+      <Header search={search} onSearch={handleSearch} />
       <main id="inicio">
         <Hero vehicles={vehicles} />
 

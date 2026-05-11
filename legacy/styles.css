@@ -1055,7 +1055,7 @@ h1 {
   position: relative;
   display: flex;
   flex-direction: column;
-  flex: 0 0 min(82vw, 360px);
+  flex: 0 0 100%;
   min-height: 300px;
   overflow: hidden;
   padding: 24px;
@@ -1082,7 +1082,7 @@ h1 {
 .deal-card-feature {
   display: grid;
   align-content: end;
-  flex: 0 0 min(88vw, 480px);
+  flex: 0 0 100%;
   min-height: 360px;
   background:
     linear-gradient(115deg, rgba(134, 225, 0, 0.2), transparent 42%),
@@ -1145,21 +1145,24 @@ h1 {
   position: relative;
   display: inline-flex;
   width: max-content;
-  min-height: 46px;
+  min-height: 44px;
   align-items: center;
   margin-top: auto;
-  padding-top: 22px;
-  padding-right: 20px;
-  padding-bottom: 0;
-  padding-left: 20px;
+  padding: 22px 22px 0;
+  border: 1.5px solid rgba(134, 225, 0, 0.45);
   border-radius: 999px;
-  color: #071000;
-  background: var(--lime);
-  box-shadow: 0 14px 34px rgba(134, 225, 0, 0.24);
-  font-size: 0.8rem;
-  font-weight: 900;
-  letter-spacing: 0.04em;
+  color: var(--lime-bright);
+  background: rgba(134, 225, 0, 0.08);
+  box-shadow: none;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
+}
+
+.deal-card a:hover {
+  background: rgba(134, 225, 0, 0.18);
+  border-color: var(--lime-bright);
 }
 
 .deal-nav {

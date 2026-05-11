@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { BrandLogo } from "@/components/brand-logo";
 import { FacebookIcon, InstagramIcon, WhatsappIcon } from "@/components/social-icons";
 import { ShowroomLogo } from "@/components/showroom-logo";
@@ -315,9 +315,13 @@ function VehicleModal({ vehicle, onClose }: { vehicle: Vehicle | null; onClose: 
   );
 }
 
+const DEAL_COUNT = 4;
+
 export function HomeExperience({ vehicles }: { vehicles: Vehicle[] }) {
   const [search, setSearch] = useState("");
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
+  const dealScrollRef = useRef<HTMLDivElement>(null);
+  const [dealSlide, setDealSlide] = useState(0);
   const filteredVehicles = useMemo(() => {
     const term = search.trim().toLowerCase();
 
@@ -338,6 +342,26 @@ export function HomeExperience({ vehicles }: { vehicles: Vehicle[] }) {
       return (firstIndex === -1 ? 99 : firstIndex) - (secondIndex === -1 ? 99 : secondIndex);
     });
   }, [filteredVehicles]);
+
+  useEffect(() => {
+    const el = dealScrollRef.current;
+    if (!el) return;
+    function onScroll() {
+      if (!el) return;
+      const cardW = el.scrollWidth / DEAL_COUNT;
+      setDealSlide(Math.min(DEAL_COUNT - 1, Math.round(el.scrollLeft / cardW)));
+    }
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  function scrollToDeal(idx: number) {
+    const el = dealScrollRef.current;
+    if (!el) return;
+    const card = el.children[idx] as HTMLElement | undefined;
+    card?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
+    setDealSlide(idx);
+  }
 
   function handleSearch(value: string, shouldScroll = false) {
     setSearch(value);
@@ -367,7 +391,7 @@ export function HomeExperience({ vehicles }: { vehicles: Vehicle[] }) {
         </section>
 
         <section className="deal-strip" aria-label="Serviços da Henrique Veículos">
-          <div className="deal-wrap">
+          <div className="deal-wrap" ref={dealScrollRef}>
             <article id="avaliacao" className="deal-card deal-card-feature">
               <span className="deal-number">01</span>
               <div>
@@ -388,19 +412,69 @@ export function HomeExperience({ vehicles }: { vehicles: Vehicle[] }) {
               <p className="deal-kicker">Consignação</p>
               <h3>Venda assistida</h3>
               <p>Anuncie com apoio da loja, atendimento no ponto físico e negociação acompanhada.</p>
+              <a
+                href="https://wa.me/5513974066867?text=Ol%C3%A1%2C%20tenho%20interesse%20em%20consignar%20meu%20ve%C3%ADculo%20na%20Henrique%20Ve%C3%ADculos"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Quero consignar
+              </a>
             </article>
             <article id="financiamento" className="deal-card">
               <span className="deal-number">03</span>
               <p className="deal-kicker">Financiamento</p>
               <h3>Simulação rápida</h3>
               <p>Condições consultadas por WhatsApp para você entender entrada, parcelas e aprovação.</p>
+              <a
+                href="https://wa.me/5513974066867?text=Ol%C3%A1%2C%20quero%20simular%20um%20financiamento%20na%20Henrique%20Ve%C3%ADculos"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Simular financiamento
+              </a>
             </article>
             <article id="empresa" className="deal-card">
               <span className="deal-number">04</span>
               <p className="deal-kicker">Empresa local</p>
               <h3>Desde 2010</h3>
               <p>Atendimento presencial em Vicente de Carvalho, Guarujá, com estoque selecionado.</p>
+              <a
+                href="https://www.google.com/maps/search/?api=1&query=Av.+Santos+Dumont+1384+Vicente+de+Carvalho+Guaruj%C3%A1+SP"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Como chegar
+              </a>
             </article>
+          </div>
+          <div className="deal-nav">
+            <button
+              className="deal-arrow"
+              type="button"
+              aria-label="Anterior"
+              onClick={() => scrollToDeal((dealSlide - 1 + DEAL_COUNT) % DEAL_COUNT)}
+            >
+              ‹
+            </button>
+            <div className="deal-dots">
+              {Array.from({ length: DEAL_COUNT }, (_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  aria-label={`Ir para slide ${i + 1}`}
+                  className={`deal-dot${dealSlide === i ? " is-active" : ""}`}
+                  onClick={() => scrollToDeal(i)}
+                />
+              ))}
+            </div>
+            <button
+              className="deal-arrow"
+              type="button"
+              aria-label="Próximo"
+              onClick={() => scrollToDeal((dealSlide + 1) % DEAL_COUNT)}
+            >
+              ›
+            </button>
           </div>
         </section>
 

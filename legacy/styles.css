@@ -107,19 +107,19 @@ input {
 .brand-logo {
   position: relative;
   display: inline-block;
-  width: 238px;
-  height: 96px;
+  width: 178px;
+  height: 72px;
   justify-self: start;
 }
 
 .logo-script {
   position: absolute;
   left: 7px;
-  top: 10px;
+  top: 8px;
   z-index: 2;
   color: var(--lime-bright);
   font-family: var(--script);
-  font-size: 3.55rem;
+  font-size: 2.6rem;
   line-height: 0.8;
   text-shadow: 0 0 1px #000, 0 3px 0 rgba(0, 0, 0, 0.4);
   transform: skew(-8deg) rotate(-4deg);
@@ -127,12 +127,12 @@ input {
 
 .logo-sub {
   position: absolute;
-  left: 126px;
-  top: 58px;
+  left: 94px;
+  top: 43px;
   z-index: 3;
   color: var(--lime-bright);
   font-family: var(--display);
-  font-size: 1.03rem;
+  font-size: 0.78rem;
   font-style: italic;
   font-weight: 900;
   letter-spacing: -0.03em;
@@ -142,10 +142,10 @@ input {
 .check-flag {
   position: absolute;
   display: block;
-  width: 78px;
-  height: 66px;
+  width: 58px;
+  height: 49px;
   background:
-    conic-gradient(#fff 25%, #050505 0 50%, #fff 0 75%, #050505 0) 0 0 / 22px 22px;
+    conic-gradient(#fff 25%, #050505 0 50%, #fff 0 75%, #050505 0) 0 0 / 16px 16px;
   clip-path: polygon(20% 0, 88% 0, 100% 54%, 74% 50%, 78% 100%, 43% 74%, 19% 100%, 30% 54%, 0 50%);
   filter: drop-shadow(0 2px 1px rgba(255, 255, 255, 0.25));
   transform: rotate(-13deg) skew(-7deg);
@@ -153,7 +153,7 @@ input {
 
 .logo-flag {
   top: -1px;
-  left: 150px;
+  left: 112px;
 }
 
 .social-top {
@@ -1034,15 +1034,29 @@ h1 {
 }
 
 .deal-wrap {
-  display: grid;
+  display: flex;
   gap: 14px;
-  width: min(1440px, calc(100% - 48px));
+  width: 100%;
+  max-width: min(1440px, calc(100% - 48px));
   margin-inline: auto;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+
+.deal-wrap::-webkit-scrollbar {
+  display: none;
 }
 
 .deal-card {
   position: relative;
-  min-height: 240px;
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 min(82vw, 360px);
+  min-height: 300px;
   overflow: hidden;
   padding: 24px;
   border: 1px solid rgba(134, 225, 0, 0.14);
@@ -1051,6 +1065,7 @@ h1 {
     linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.015)),
     var(--asphalt-soft);
   box-shadow: 0 18px 42px rgba(0, 0, 0, 0.32);
+  scroll-snap-align: start;
 }
 
 .deal-card::before {
@@ -1067,7 +1082,8 @@ h1 {
 .deal-card-feature {
   display: grid;
   align-content: end;
-  min-height: 320px;
+  flex: 0 0 min(88vw, 480px);
+  min-height: 360px;
   background:
     linear-gradient(115deg, rgba(134, 225, 0, 0.2), transparent 42%),
     repeating-linear-gradient(-12deg, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px 16px),
@@ -1131,8 +1147,11 @@ h1 {
   width: max-content;
   min-height: 46px;
   align-items: center;
-  margin-top: 22px;
-  padding: 0 20px;
+  margin-top: auto;
+  padding-top: 22px;
+  padding-right: 20px;
+  padding-bottom: 0;
+  padding-left: 20px;
   border-radius: 999px;
   color: #071000;
   background: var(--lime);
@@ -1141,6 +1160,58 @@ h1 {
   font-weight: 900;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+}
+
+.deal-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 18px 0 4px;
+  width: min(1440px, calc(100% - 48px));
+  margin-inline: auto;
+}
+
+.deal-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(134, 225, 0, 0.3);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--lime-bright);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.deal-arrow:hover {
+  background: rgba(134, 225, 0, 0.1);
+  border-color: rgba(134, 225, 0, 0.6);
+}
+
+.deal-dots {
+  display: flex;
+  gap: 8px;
+}
+
+.deal-dot {
+  width: 8px;
+  height: 8px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(134, 225, 0, 0.25);
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.15s, transform 0.15s;
+}
+
+.deal-dot.is-active {
+  background: var(--lime-bright);
+  transform: scale(1.3);
 }
 
 .section {
@@ -2411,14 +2482,6 @@ h1 {
 }
 
 @media (min-width: 720px) {
-  .deal-wrap {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .deal-card-feature {
-    grid-column: span 3;
-  }
-
   .featured-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -2497,14 +2560,6 @@ h1 {
 
   .featured-grid {
     grid-template-columns: repeat(3, 1fr);
-  }
-
-  .deal-wrap {
-    grid-template-columns: 1.35fr repeat(3, minmax(0, 0.72fr));
-  }
-
-  .deal-card-feature {
-    grid-column: auto;
   }
 
   .showroom-layout {

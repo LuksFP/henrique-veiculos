@@ -13,6 +13,7 @@ type FilterKey = Status | "todos";
 const statusLabel: Record<Status, string> = {
   novo: "Novo",
   contato: "Contato",
+  em_negociacao: "Em Negociação",
   proposta: "Proposta",
   fechado: "Fechado",
   perdido: "Perdido",
@@ -21,6 +22,7 @@ const statusLabel: Record<Status, string> = {
 const statusCss: Record<Status, string> = {
   novo: "adm-tag--yellow",
   contato: "adm-tag--cyan",
+  em_negociacao: "adm-tag--cyan",
   proposta: "adm-tag--yellow",
   fechado: "adm-tag--green",
   perdido: "adm-tag--red",
@@ -30,6 +32,7 @@ const filterOptions: { key: FilterKey; label: string }[] = [
   { key: "todos", label: "Todos" },
   { key: "novo", label: "Novos" },
   { key: "contato", label: "Contato" },
+  { key: "em_negociacao", label: "Em Negociação" },
   { key: "proposta", label: "Proposta" },
   { key: "fechado", label: "Fechados" },
   { key: "perdido", label: "Perdidos" },
@@ -180,6 +183,7 @@ export function CrmClient({ leads }: { leads: LeadRow[] }) {
                 >
                   <option value="novo">Novo</option>
                   <option value="contato">Contato</option>
+                  <option value="em_negociacao">Em Negociação</option>
                   <option value="proposta">Proposta</option>
                   <option value="fechado">Fechado</option>
                   <option value="perdido">Perdido</option>

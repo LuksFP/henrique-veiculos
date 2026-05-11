@@ -1,4 +1,4 @@
-﻿import { Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { requireAdmin } from "@/lib/admin";
 import { CrmClient } from "@/components/crm-client";
 import { createLeadAction } from "@/app/actions/leads";
@@ -17,7 +17,7 @@ async function getLeads(): Promise<LeadRow[]> {
 const OK: Record<string, string> = {
   created: "Lead cadastrado.",
   updated: "Lead atualizado.",
-  deleted: "Lead excluÃ­do.",
+  deleted: "Lead excluído.",
 };
 
 export default async function CrmPage({
@@ -43,7 +43,7 @@ export default async function CrmPage({
       <details className="adm-card adm-form-card">
         <summary className="adm-card-head">
           <h2 className="adm-card-title">Novo Lead</h2>
-          <span className="adm-card-toggle">â€º</span>
+          <span className="adm-card-toggle">›</span>
         </summary>
         <div className="adm-card-body">
           <form className="adm-form" action={createLeadAction}>
@@ -60,7 +60,7 @@ export default async function CrmPage({
               <input className="adm-input" name="email" type="email" placeholder="cliente@email.com" />
             </div>
             <div className="adm-field">
-              <label className="adm-label">VeÃ­culo de interesse</label>
+              <label className="adm-label">Veículo de interesse</label>
               <input className="adm-input" name="vehicle_label" placeholder="Toyota Corolla XLS" />
             </div>
             <div className="adm-field">
@@ -68,6 +68,7 @@ export default async function CrmPage({
               <select className="adm-input" name="status">
                 <option value="novo">Novo</option>
                 <option value="contato">Contato</option>
+                <option value="em_negociacao">Em Negociação</option>
                 <option value="proposta">Proposta</option>
                 <option value="fechado">Fechado</option>
                 <option value="perdido">Perdido</option>
@@ -78,14 +79,14 @@ export default async function CrmPage({
               <select className="adm-input" name="source">
                 <option value="whatsapp">WhatsApp</option>
                 <option value="site">Site</option>
-                <option value="indicacao">IndicaÃ§Ã£o</option>
+                <option value="indicacao">Indicação</option>
                 <option value="instagram">Instagram</option>
                 <option value="outro">Outro</option>
               </select>
             </div>
             <div className="adm-field adm-field--wide">
-              <label className="adm-label">ObservaÃ§Ãµes</label>
-              <textarea className="adm-input adm-textarea" name="notes" placeholder="AnotaÃ§Ãµes sobre o lead..." />
+              <label className="adm-label">Observações</label>
+              <textarea className="adm-input adm-textarea" name="notes" placeholder="Anotações sobre o lead..." />
             </div>
             <div className="adm-form-foot">
               <button className="adm-btn-primary" type="submit">

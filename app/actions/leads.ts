@@ -13,7 +13,7 @@ const leadSchema = z.object({
     .optional()
     .transform((v) => (v?.includes("@") ? v : null)),
   vehicle_label: z.string().trim().max(160).optional().transform((v) => v || null),
-  status: z.enum(["novo", "contato", "proposta", "fechado", "perdido"]).default("novo"),
+  status: z.enum(["novo", "contato", "em_negociacao", "proposta", "fechado", "perdido"]).default("novo"),
   source: z.enum(["whatsapp", "site", "indicacao", "instagram", "outro"]).default("outro"),
   notes: z.string().trim().max(1000).optional().transform((v) => v || null),
 });
@@ -61,7 +61,7 @@ export async function updateLeadAction(formData: FormData) {
 export async function updateLeadStatusAction(formData: FormData) {
   const supabase = await requireAdmin();
   const id = String(formData.get("id") ?? "").trim();
-  const status = String(formData.get("status") ?? "").trim() as "novo" | "contato" | "proposta" | "fechado" | "perdido";
+  const status = String(formData.get("status") ?? "").trim() as "novo" | "contato" | "em_negociacao" | "proposta" | "fechado" | "perdido";
   if (!id || !status) fail("Dados ausentes.");
   const { error } = await supabase.from("leads").update({ status }).eq("id", id);
   if (error) fail(error.message);

@@ -1,4 +1,4 @@
-﻿import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { requireAdmin } from "@/lib/admin";
 import { FinanceiroCharts } from "@/components/financeiro-charts";
 import { createExpenseAction, deleteExpenseAction } from "@/app/actions/expenses";
@@ -8,7 +8,7 @@ import { pad, toISO, formatCurrency } from "@/lib/fmt";
 const CATEGORY_LABELS: Record<ExpenseRow["category"], string> = {
   aluguel: "Aluguel",
   folha: "Folha",
-  manutencao: "ManutenÃ§Ã£o",
+  manutencao: "Manutenção",
   marketing: "Marketing",
   outros: "Outros",
 };
@@ -35,7 +35,7 @@ function pctDelta(current: number, prev: number) {
 
 const OK: Record<string, string> = {
   expense_created: "Despesa cadastrada.",
-  expense_deleted: "Despesa excluÃ­da.",
+  expense_deleted: "Despesa excluída.",
 };
 
 export default async function FinanceiroPage({
@@ -85,7 +85,7 @@ export default async function FinanceiroPage({
       <div className="adm-page-head">
         <div>
           <h1 className="adm-page-title">Financeiro</h1>
-          <p className="adm-page-sub">Ganhos por semana e por mÃªs</p>
+          <p className="adm-page-sub">Ganhos por semana e por mês</p>
         </div>
       </div>
 
@@ -98,7 +98,7 @@ export default async function FinanceiroPage({
             <span className="fin-period-title">Esta Semana</span>
             {weekDelta && (
               <span className={`fin-delta fin-delta--${weekDelta.positive ? "up" : "down"}`}>
-                {weekDelta.positive ? "â†‘" : "â†“"} {weekDelta.text} vs anterior
+                {weekDelta.positive ? "↑" : "↓"} {weekDelta.text} vs anterior
               </span>
             )}
           </div>
@@ -107,44 +107,44 @@ export default async function FinanceiroPage({
             {thisWeekSales.length} venda{thisWeekSales.length !== 1 ? "s" : ""} esta semana
           </div>
           <div className="fin-period-prev">
-            Semana anterior: <strong>{fmt(lastWeekReceita)}</strong> Â· {lastWeekSales.length} venda{lastWeekSales.length !== 1 ? "s" : ""}
+            Semana anterior: <strong>{fmt(lastWeekReceita)}</strong> · {lastWeekSales.length} venda{lastWeekSales.length !== 1 ? "s" : ""}
           </div>
         </div>
 
         <div className="fin-period-card">
           <div className="fin-period-head">
-            <span className="fin-period-title">Este MÃªs</span>
+            <span className="fin-period-title">Este Mês</span>
             {monthDelta && (
               <span className={`fin-delta fin-delta--${monthDelta.positive ? "up" : "down"}`}>
-                {monthDelta.positive ? "â†‘" : "â†“"} {monthDelta.text} vs anterior
+                {monthDelta.positive ? "↑" : "↓"} {monthDelta.text} vs anterior
               </span>
             )}
           </div>
           <div className="fin-period-value">{fmt(thisMonthReceita)}</div>
           <div className="fin-period-count">
-            {thisMonthSales.length} venda{thisMonthSales.length !== 1 ? "s" : ""} este mÃªs
+            {thisMonthSales.length} venda{thisMonthSales.length !== 1 ? "s" : ""} este mês
           </div>
           <div className="fin-period-prev">
-            MÃªs anterior: <strong>{fmt(lastMonthReceita)}</strong> Â· {lastMonthSales.length} venda{lastMonthSales.length !== 1 ? "s" : ""}
+            Mês anterior: <strong>{fmt(lastMonthReceita)}</strong> · {lastMonthSales.length} venda{lastMonthSales.length !== 1 ? "s" : ""}
           </div>
         </div>
       </div>
 
       <div className="dash-kpis" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
         <div className="dash-kpi">
-          <div className="dash-kpi-icon">ðŸ’°</div>
+          <div className="dash-kpi-icon">💰</div>
           <div className="dash-kpi-value">{fmt(totalReceita)}</div>
           <div className="dash-kpi-label">Receita Total</div>
         </div>
         <div className="dash-kpi">
-          <div className="dash-kpi-icon">ðŸš—</div>
+          <div className="dash-kpi-icon">🚗</div>
           <div className="dash-kpi-value">{sales.length}</div>
           <div className="dash-kpi-label">Vendas Totais</div>
         </div>
         <div className="dash-kpi">
-          <div className="dash-kpi-icon">ðŸ·ï¸</div>
+          <div className="dash-kpi-icon">🏷️</div>
           <div className="dash-kpi-value">{fmt(ticketMedio)}</div>
-          <div className="dash-kpi-label">Ticket MÃ©dio</div>
+          <div className="dash-kpi-label">Ticket Médio</div>
         </div>
       </div>
 
@@ -153,13 +153,13 @@ export default async function FinanceiroPage({
       <details className="adm-card adm-form-card">
         <summary className="adm-card-head">
           <h2 className="adm-card-title">Registrar Despesa</h2>
-          <span className="adm-card-toggle">â€º</span>
+          <span className="adm-card-toggle">›</span>
         </summary>
         <div className="adm-card-body">
           <form className="adm-form" action={createExpenseAction}>
             <div className="adm-field">
-              <label className="adm-label">DescriÃ§Ã£o</label>
-              <input className="adm-input" name="description" required placeholder="Aluguel do galpÃ£o" />
+              <label className="adm-label">Descrição</label>
+              <input className="adm-input" name="description" required placeholder="Aluguel do galpão" />
             </div>
             <div className="adm-field">
               <label className="adm-label">Valor (R$)</label>
@@ -183,7 +183,7 @@ export default async function FinanceiroPage({
               />
             </div>
             <div className="adm-field adm-field--wide">
-              <label className="adm-label">ObservaÃ§Ãµes</label>
+              <label className="adm-label">Observações</label>
               <textarea className="adm-input adm-textarea" name="notes" placeholder="Detalhe opcional..." />
             </div>
             <div className="adm-form-foot">
@@ -203,7 +203,7 @@ export default async function FinanceiroPage({
         ) : (
           <>
             <div className="fin-table-head" style={{ gridTemplateColumns: "1fr 120px 100px 110px 60px" }}>
-              <span>DescriÃ§Ã£o</span>
+              <span>Descrição</span>
               <span>Categoria</span>
               <span>Data</span>
               <span style={{ textAlign: "right" }}>Valor</span>
@@ -218,7 +218,7 @@ export default async function FinanceiroPage({
                 <span className="adm-tag adm-tag--muted">{CATEGORY_LABELS[e.category]}</span>
                 <span className="fin-td-muted">{new Date(e.expense_date).toLocaleDateString("pt-BR")}</span>
                 <span className="fin-td-value fin-td-value--neg">
-                  âˆ’ R$ {Number(e.amount).toLocaleString("pt-BR")}
+                  − R$ {Number(e.amount).toLocaleString("pt-BR")}
                 </span>
                 <form action={deleteExpenseAction} style={{ display: "flex", justifyContent: "flex-end" }}>
                   <input type="hidden" name="id" value={e.id} />

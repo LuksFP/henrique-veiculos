@@ -62,7 +62,7 @@ export type Database = {
           email: string | null;
           vehicle_id: string | null;
           vehicle_label: string | null;
-          status: "novo" | "contato" | "proposta" | "fechado" | "perdido";
+          status: "novo" | "contato" | "em_negociacao" | "proposta" | "fechado" | "perdido";
           source: "whatsapp" | "site" | "indicacao" | "instagram" | "outro";
           notes: string | null;
           created_at: string;
@@ -75,7 +75,7 @@ export type Database = {
           email?: string | null;
           vehicle_id?: string | null;
           vehicle_label?: string | null;
-          status?: "novo" | "contato" | "proposta" | "fechado" | "perdido";
+          status?: "novo" | "contato" | "em_negociacao" | "proposta" | "fechado" | "perdido";
           source?: "whatsapp" | "site" | "indicacao" | "instagram" | "outro";
           notes?: string | null;
           created_at?: string;
@@ -88,7 +88,7 @@ export type Database = {
           email?: string | null;
           vehicle_id?: string | null;
           vehicle_label?: string | null;
-          status?: "novo" | "contato" | "proposta" | "fechado" | "perdido";
+          status?: "novo" | "contato" | "em_negociacao" | "proposta" | "fechado" | "perdido";
           source?: "whatsapp" | "site" | "indicacao" | "instagram" | "outro";
           notes?: string | null;
           updated_at?: string;

@@ -82,6 +82,9 @@ export default async function CrmPage({
                 <option value="indicacao">Indicação</option>
                 <option value="instagram">Instagram</option>
                 <option value="outro">Outro</option>
+                <option value="avaliacao">Avaliação</option>
+                <option value="consignacao">Consignação</option>
+                <option value="financiamento">Financiamento</option>
               </select>
             </div>
             <div className="adm-field adm-field--wide">

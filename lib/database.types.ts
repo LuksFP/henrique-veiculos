@@ -63,7 +63,7 @@ export type Database = {
           vehicle_id: string | null;
           vehicle_label: string | null;
           status: "novo" | "contato" | "em_negociacao" | "proposta" | "fechado" | "perdido";
-          source: "whatsapp" | "site" | "indicacao" | "instagram" | "outro";
+          source: "whatsapp" | "site" | "indicacao" | "instagram" | "outro" | "avaliacao" | "consignacao" | "financiamento";
           notes: string | null;
           created_at: string;
           updated_at: string;
@@ -76,7 +76,7 @@ export type Database = {
           vehicle_id?: string | null;
           vehicle_label?: string | null;
           status?: "novo" | "contato" | "em_negociacao" | "proposta" | "fechado" | "perdido";
-          source?: "whatsapp" | "site" | "indicacao" | "instagram" | "outro";
+          source?: "whatsapp" | "site" | "indicacao" | "instagram" | "outro" | "avaliacao" | "consignacao" | "financiamento";
           notes?: string | null;
           created_at?: string;
           updated_at?: string;
@@ -89,7 +89,7 @@ export type Database = {
           vehicle_id?: string | null;
           vehicle_label?: string | null;
           status?: "novo" | "contato" | "em_negociacao" | "proposta" | "fechado" | "perdido";
-          source?: "whatsapp" | "site" | "indicacao" | "instagram" | "outro";
+          source?: "whatsapp" | "site" | "indicacao" | "instagram" | "outro" | "avaliacao" | "consignacao" | "financiamento";
           notes?: string | null;
           updated_at?: string;
         };

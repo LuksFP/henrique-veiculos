@@ -3536,3 +3536,19 @@ a.sp-contact-value:hover {
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Scroll reveal ─────────────────────────────────────────────── */
+.sp-animate-in {
+  animation: rise 0.6s cubic-bezier(0.2, 0, 0, 1) both;
+}
+
+.sp-reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.sp-reveal[data-visible="1"] {
+  opacity: 1;
+  transform: translateY(0);
+}

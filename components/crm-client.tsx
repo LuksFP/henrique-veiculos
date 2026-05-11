@@ -3,12 +3,13 @@
 import { useState, useEffect } from "react";
 
 const PAGE_SIZE = 25;
-import { Phone, Mail, Car, Calendar, X, Save, Trash2 } from "lucide-react";
+import { Phone, Mail, Car, Calendar, X, Save, Trash2, Tag } from "lucide-react";
 import type { LeadRow } from "@/lib/database.types";
 import { updateLeadAction, deleteLeadAction } from "@/app/actions/leads";
 
 type Status = LeadRow["status"];
 type FilterKey = Status | "todos";
+type SourceFilter = "todos" | LeadRow["source"];
 
 const statusLabel: Record<Status, string> = {
   novo: "Novo",
@@ -28,6 +29,17 @@ const statusCss: Record<Status, string> = {
   perdido: "adm-tag--red",
 };
 
+const sourceLabel: Record<string, string> = {
+  whatsapp: "WhatsApp",
+  site: "Site",
+  indicacao: "Indicação",
+  instagram: "Instagram",
+  outro: "Outro",
+  avaliacao: "Avaliação",
+  consignacao: "Consignação",
+  financiamento: "Financiamento",
+};
+
 const filterOptions: { key: FilterKey; label: string }[] = [
   { key: "todos", label: "Todos" },
   { key: "novo", label: "Novos" },
@@ -38,12 +50,22 @@ const filterOptions: { key: FilterKey; label: string }[] = [
   { key: "perdido", label: "Perdidos" },
 ];
 
+const sourceFilterOptions: { key: SourceFilter; label: string }[] = [
+  { key: "todos", label: "Todos" },
+  { key: "avaliacao", label: "Avaliação" },
+  { key: "consignacao", label: "Consignação" },
+  { key: "financiamento", label: "Financiamento" },
+  { key: "whatsapp", label: "WhatsApp" },
+  { key: "site", label: "Site" },
+];
+
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("pt-BR");
 }
 
 export function CrmClient({ leads }: { leads: LeadRow[] }) {
   const [filter, setFilter] = useState<FilterKey>("todos");
+  const [sourceFilter, setSourceFilter] = useState<SourceFilter>("todos");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<LeadRow | null>(null);
   const [editStatus, setEditStatus] = useState<Status>("novo");
@@ -51,8 +73,9 @@ export function CrmClient({ leads }: { leads: LeadRow[] }) {
 
   const q = search.toLowerCase();
   const filteredAll = (filter === "todos" ? leads : leads.filter((l) => l.status === filter))
+    .filter((l) => sourceFilter === "todos" || l.source === sourceFilter)
     .filter((l) => !q || l.name.toLowerCase().includes(q) || l.phone.includes(q));
-  useEffect(() => { setPage(1); setSelected(null); }, [filter, search]);
+  useEffect(() => { setPage(1); setSelected(null); }, [filter, search, sourceFilter]);
 
   const totalPages = Math.ceil(filteredAll.length / PAGE_SIZE);
   const filtered = filteredAll.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -61,6 +84,10 @@ export function CrmClient({ leads }: { leads: LeadRow[] }) {
 
   function countFor(key: FilterKey) {
     return key === "todos" ? leads.length : leads.filter((l) => l.status === key).length;
+  }
+
+  function countForSource(key: SourceFilter) {
+    return key === "todos" ? leads.length : leads.filter((l) => l.source === key).length;
   }
 
   function handleSelect(lead: LeadRow) {
@@ -87,6 +114,20 @@ export function CrmClient({ leads }: { leads: LeadRow[] }) {
           >
             {label}
             <span className="crm-chip-count">{countFor(key)}</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="crm-filters">
+        <span style={{ fontSize: "0.72rem", color: "oklch(0.6 0.02 260)", alignSelf: "center", marginRight: "4px", whiteSpace: "nowrap" }}>Origem</span>
+        {sourceFilterOptions.map(({ key, label }) => (
+          <button
+            key={key}
+            className={`crm-chip ${sourceFilter === key ? "is-active" : ""}`}
+            onClick={() => setSourceFilter(key)}
+          >
+            {label}
+            <span className="crm-chip-count">{countForSource(key)}</span>
           </button>
         ))}
       </div>
@@ -156,6 +197,10 @@ export function CrmClient({ leads }: { leads: LeadRow[] }) {
                 <div className="crm-info-item">
                   <Calendar size={14} />
                   <span>{formatDate(selected.created_at)}</span>
+                </div>
+                <div className="crm-info-item">
+                  <Tag size={14} />
+                  <span>{sourceLabel[selected.source] ?? selected.source}</span>
                 </div>
               </div>
 

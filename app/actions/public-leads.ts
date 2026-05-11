@@ -10,7 +10,7 @@ const schema = z.object({
   phone: z.string().trim().min(1).max(30),
   email: z.string().trim().max(120).optional().transform((v) => (v?.includes("@") ? v : null)),
   vehicle_label: z.string().trim().max(160).optional().transform((v) => v || null),
-  source: z.enum(["whatsapp", "site", "indicacao", "instagram", "outro"]).default("site"),
+  source: z.enum(["whatsapp", "site", "indicacao", "instagram", "outro", "avaliacao", "consignacao", "financiamento"]).default("site"),
   notes: z.string().trim().max(2000).optional().transform((v) => v || null),
 });
 
@@ -34,7 +34,7 @@ export async function submitPublicLeadAction(formData: FormData) {
     phone: formData.get("phone"),
     email: formData.get("email"),
     vehicle_label: vehicleLabel,
-    source: "site",
+    source: formData.get("source") ?? "site",
     notes: formData.get("notes"),
   });
 

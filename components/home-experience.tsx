@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { BrandLogo } from "@/components/brand-logo";
 import { FacebookIcon, InstagramIcon, WhatsappIcon } from "@/components/social-icons";
 import { ShowroomLogo } from "@/components/showroom-logo";
@@ -55,11 +56,11 @@ function Header({
                 Home
               </a>
               <a href="#estoque">Estoque</a>
-              <a href="/avaliacao">Avaliação</a>
-              <a href="/consignacao">Consignação</a>
-              <a href="/financiamento">Financiamento</a>
-              <a href="/empresa">Empresa</a>
-              <a href="/contato">Contato</a>
+              <Link href="/avaliacao">Avaliação</Link>
+              <Link href="/consignacao">Consignação</Link>
+              <Link href="/financiamento">Financiamento</Link>
+              <Link href="/empresa">Empresa</Link>
+              <Link href="/contato">Contato</Link>
             </div>
             <form
               className="nav-search"

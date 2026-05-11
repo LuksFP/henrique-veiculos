@@ -360,8 +360,7 @@ export function HomeExperience({ vehicles }: { vehicles: Vehicle[] }) {
       setDealSlide((prev) => {
         const next = (prev + 1) % DEAL_COUNT;
         const el = dealScrollRef.current;
-        const card = el?.children[next] as HTMLElement | undefined;
-        card?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
+        if (el) el.scrollTo({ left: next * (el.scrollWidth / DEAL_COUNT), behavior: "smooth" });
         return next;
       });
     }, 2000);
@@ -371,8 +370,7 @@ export function HomeExperience({ vehicles }: { vehicles: Vehicle[] }) {
   function scrollToDeal(idx: number) {
     const el = dealScrollRef.current;
     if (!el) return;
-    const card = el.children[idx] as HTMLElement | undefined;
-    card?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
+    el.scrollTo({ left: idx * (el.scrollWidth / DEAL_COUNT), behavior: "smooth" });
     setDealSlide(idx);
   }
 

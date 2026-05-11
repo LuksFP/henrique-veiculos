@@ -41,12 +41,15 @@ function formatDate(iso: string) {
 
 export function CrmClient({ leads }: { leads: LeadRow[] }) {
   const [filter, setFilter] = useState<FilterKey>("todos");
+  const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<LeadRow | null>(null);
   const [editStatus, setEditStatus] = useState<Status>("novo");
   const [page, setPage] = useState(1);
 
-  const filteredAll = filter === "todos" ? leads : leads.filter((l) => l.status === filter);
-  useEffect(() => { setPage(1); setSelected(null); }, [filter]);
+  const q = search.toLowerCase();
+  const filteredAll = (filter === "todos" ? leads : leads.filter((l) => l.status === filter))
+    .filter((l) => !q || l.name.toLowerCase().includes(q) || l.phone.includes(q));
+  useEffect(() => { setPage(1); setSelected(null); }, [filter, search]);
 
   const totalPages = Math.ceil(filteredAll.length / PAGE_SIZE);
   const filtered = filteredAll.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -65,6 +68,14 @@ export function CrmClient({ leads }: { leads: LeadRow[] }) {
   return (
     <>
       <div className="crm-filters">
+        <input
+          type="search"
+          placeholder="Buscar por nome ou telefone..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="adm-input"
+          style={{ minWidth: 240, marginRight: "auto" }}
+        />
         {filterOptions.map(({ key, label }) => (
           <button
             key={key}

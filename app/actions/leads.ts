@@ -58,6 +58,18 @@ export async function updateLeadAction(formData: FormData) {
   redirect("/admin/crm?success=updated");
 }
 
+export async function updateLeadStatusAction(formData: FormData) {
+  const supabase = await requireAdmin();
+  const id = String(formData.get("id") ?? "").trim();
+  const status = String(formData.get("status") ?? "").trim() as "novo" | "contato" | "proposta" | "fechado" | "perdido";
+  if (!id || !status) fail("Dados ausentes.");
+  const { error } = await supabase.from("leads").update({ status }).eq("id", id);
+  if (error) fail(error.message);
+  revalidatePath("/admin/crm");
+  revalidatePath("/admin");
+  redirect("/admin/crm");
+}
+
 export async function deleteLeadAction(formData: FormData) {
   const supabase = await requireAdmin();
   const id = String(formData.get("id") ?? "").trim();

@@ -11,10 +11,11 @@ const errors: Record<string, string> = {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; success?: string }>;
 }) {
   const params = await searchParams;
   const message = params.error ? errors[params.error] : null;
+  const successMsg = params.success === "reset" ? "Senha alterada com sucesso. Faça login abaixo." : null;
 
   return (
     <main className="login-page">
@@ -81,9 +82,10 @@ export default async function LoginPage({
                 <input type="checkbox" name="remember" />
                 <span>Lembrar-me</span>
               </label>
-              <a href="#" className="login-forgot">Esqueci minha senha</a>
+              <a href="/reset-senha" className="login-forgot">Esqueci minha senha</a>
             </div>
 
+            {successMsg ? <p className="login-error" role="alert" style={{ color: "var(--primary)" }}>{successMsg}</p> : null}
             {message ? <p className="login-error" role="alert">{message}</p> : null}
 
             <button className="login-btn" type="submit">ENTRAR</button>

@@ -70,6 +70,7 @@ export default async function ContatoPage({
 
                 <form className="sp-form" action={submitPublicLeadAction}>
                   <input type="hidden" name="_origin" value="/contato" />
+                  <input type="hidden" name="source" value="site" />
                   <div className="sp-fields">
                     <div className="sp-field sp-field--wide">
                       <label>Nome *</label>

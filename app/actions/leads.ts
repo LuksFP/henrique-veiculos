@@ -14,7 +14,7 @@ const leadSchema = z.object({
     .transform((v) => (v?.includes("@") ? v : null)),
   vehicle_label: z.string().trim().max(160).optional().transform((v) => v || null),
   status: z.enum(["novo", "contato", "em_negociacao", "proposta", "fechado", "perdido"]).default("novo"),
-  source: z.enum(["whatsapp", "site", "indicacao", "instagram", "outro"]).default("outro"),
+  source: z.enum(["whatsapp", "site", "indicacao", "instagram", "outro", "avaliacao", "consignacao", "financiamento"]).default("outro"),
   notes: z.string().trim().max(1000).optional().transform((v) => v || null),
 });
 

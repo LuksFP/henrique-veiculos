@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/lib/database.types";
 
 const schema = z.object({
   name: z.string().trim().min(1).max(120),
@@ -43,8 +44,10 @@ export async function submitPublicLeadAction(formData: FormData) {
     redirect(`${formData.get("_origin") ?? "/"}?error=${encodeURIComponent(msg)}`);
   }
 
-  const supabase = await createClient();
-  if (!supabase) redirect("/");
+  const supabase = createSupabaseClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 
   const { error } = await supabase.from("leads").insert({ ...parsed.data, status: "novo" });
 

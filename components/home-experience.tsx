@@ -355,6 +355,19 @@ export function HomeExperience({ vehicles }: { vehicles: Vehicle[] }) {
     return () => el.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setDealSlide((prev) => {
+        const next = (prev + 1) % DEAL_COUNT;
+        const el = dealScrollRef.current;
+        const card = el?.children[next] as HTMLElement | undefined;
+        card?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
+        return next;
+      });
+    }, 2000);
+    return () => window.clearInterval(timer);
+  }, []);
+
   function scrollToDeal(idx: number) {
     const el = dealScrollRef.current;
     if (!el) return;

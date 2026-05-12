@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { BrandLogo } from "@/components/brand-logo";
 import { submitPublicLeadAction } from "@/app/actions/public-leads";
 import { ScrollReveal } from "@/components/scroll-reveal";
+import { FinancingCalculator } from "@/components/financing-calculator";
 
 export const metadata: Metadata = {
   title: "Financiamento | Henrique Veículos",
@@ -33,6 +34,10 @@ export default async function FinanciamentoPage({
             <h1 className="sp-title">Aprove seu financiamento com facilidade.</h1>
             <p className="sp-lede">Consultamos as melhores condições do mercado para você entender entrada, parcelas e chances de aprovação antes de decidir.</p>
           </div>
+
+          <ScrollReveal delay={80}>
+            <FinancingCalculator />
+          </ScrollReveal>
 
           <div className="sp-body">
             <ScrollReveal delay={100}>

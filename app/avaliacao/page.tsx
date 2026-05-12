@@ -66,6 +66,7 @@ export default async function AvaliacaoPage({
                 <form className="sp-form" action={submitPublicLeadAction}>
                   <input type="hidden" name="_origin" value="/avaliacao" />
                   <input type="hidden" name="source" value="avaliacao" />
+                  <input type="text" name="_hp" style={{ display: "none" }} tabIndex={-1} autoComplete="off" aria-hidden="true" />
 
                   <fieldset className="sp-fieldset">
                     <legend>Dados do Veículo</legend>

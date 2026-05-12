@@ -17,6 +17,10 @@ const schema = z.object({
 });
 
 export async function submitPublicLeadAction(formData: FormData) {
+  if (formData.get("_hp")) {
+    redirect(`${formData.get("_origin") ?? "/"}?success=1`);
+  }
+
   const vehicleParts = [
     formData.get("vehicle_marca"),
     formData.get("vehicle_modelo"),

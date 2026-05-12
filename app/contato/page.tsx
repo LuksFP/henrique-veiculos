@@ -71,6 +71,7 @@ export default async function ContatoPage({
                 <form className="sp-form" action={submitPublicLeadAction}>
                   <input type="hidden" name="_origin" value="/contato" />
                   <input type="hidden" name="source" value="site" />
+                  <input type="text" name="_hp" style={{ display: "none" }} tabIndex={-1} autoComplete="off" aria-hidden="true" />
                   <div className="sp-fields">
                     <div className="sp-field sp-field--wide">
                       <label>Nome *</label>

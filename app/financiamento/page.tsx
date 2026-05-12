@@ -68,6 +68,7 @@ export default async function FinanciamentoPage({
                 <form className="sp-form" action={submitPublicLeadAction}>
                   <input type="hidden" name="_origin" value="/financiamento" />
                   <input type="hidden" name="source" value="financiamento" />
+                  <input type="text" name="_hp" style={{ display: "none" }} tabIndex={-1} autoComplete="off" aria-hidden="true" />
 
                   <fieldset className="sp-fieldset">
                     <legend>Veículo de Interesse</legend>

@@ -3537,6 +3537,218 @@ a.sp-contact-value:hover {
   }
 }
 
+/* ── Consignment Calculator ────────────────────────────────────── */
+.cc-card {
+  background: #0a0f07;
+  border: 1px solid rgba(134, 225, 0, 0.18);
+  border-radius: 18px;
+  padding: 32px;
+  margin-bottom: 40px;
+}
+
+.cc-header {
+  margin-bottom: 24px;
+}
+
+.cc-eyebrow {
+  margin: 0 0 8px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--lime);
+}
+
+.cc-title {
+  margin: 0 0 6px;
+  font-family: var(--display);
+  font-size: clamp(1.3rem, 2.5vw, 1.7rem);
+  font-weight: 900;
+  color: #fff;
+}
+
+.cc-subtitle {
+  margin: 0;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.cc-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.cc-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cc-field label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.cc-field input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid rgba(134, 225, 0, 0.18);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+  font: inherit;
+  font-size: 0.925rem;
+  outline: none;
+}
+
+.cc-field input:focus {
+  border-color: rgba(134, 225, 0, 0.5);
+  box-shadow: 0 0 0 2px rgba(134, 225, 0, 0.09);
+}
+
+.cc-rate-group {
+  display: flex;
+  gap: 8px;
+}
+
+.cc-rate-btn {
+  flex: 1;
+  padding: 10px 0;
+  border: 1px solid rgba(134, 225, 0, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.5);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 120ms;
+}
+
+.cc-rate-btn:hover {
+  border-color: rgba(134, 225, 0, 0.4);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.cc-rate-btn--active {
+  border-color: var(--lime);
+  background: rgba(134, 225, 0, 0.1);
+  color: var(--lime);
+}
+
+.cc-results {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cc-result-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 24px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(134, 225, 0, 0.1);
+  border-radius: 12px;
+  flex-wrap: wrap;
+}
+
+.cc-result-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 120px;
+}
+
+.cc-result-item--highlight {
+  border-left: 2px solid rgba(134, 225, 0, 0.3);
+  padding-left: 16px;
+}
+
+.cc-result-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.cc-result-value {
+  font-family: var(--display);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.cc-result-value--dim {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.cc-result-value--lime {
+  color: var(--lime);
+  font-size: 1.5rem;
+}
+
+.cc-result-divider {
+  font-family: var(--display);
+  font-size: 1.4rem;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
+}
+
+.cc-disclaimer {
+  margin: 0;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.28);
+  line-height: 1.5;
+  font-style: italic;
+}
+
+.cc-empty {
+  padding: 20px;
+  text-align: center;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.28);
+  border: 1px dashed rgba(134, 225, 0, 0.1);
+  border-radius: 10px;
+}
+
+@media (max-width: 600px) {
+  .cc-inputs {
+    grid-template-columns: 1fr;
+  }
+
+  .cc-result-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .cc-result-divider {
+    display: none;
+  }
+
+  .cc-result-item--highlight {
+    border-left: none;
+    border-top: 1px solid rgba(134, 225, 0, 0.2);
+    padding-left: 0;
+    padding-top: 14px;
+    width: 100%;
+  }
+
+  .cc-card {
+    padding: 20px;
+  }
+}
+
 /* ── Financing Calculator ──────────────────────────────────────── */
 .fc-card {
   background: #0a0f07;

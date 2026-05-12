@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { BrandLogo } from "@/components/brand-logo";
 import { submitPublicLeadAction } from "@/app/actions/public-leads";
 import { ScrollReveal } from "@/components/scroll-reveal";
+import { ConsignmentCalculator } from "@/components/consignment-calculator";
 
 export const metadata: Metadata = {
   title: "Consignação | Henrique Veículos",
@@ -31,6 +32,10 @@ export default async function ConsignacaoPage({
             <h1 className="sp-title">Venda assistida com apoio da loja.</h1>
             <p className="sp-lede">Anuncie seu veículo com o suporte da Henrique Veículos. Atendimento no ponto físico, negociação acompanhada e mais visibilidade para o seu carro ou moto.</p>
           </div>
+
+          <ScrollReveal delay={80}>
+            <ConsignmentCalculator />
+          </ScrollReveal>
 
           <div className="sp-body">
             <ScrollReveal delay={100}>

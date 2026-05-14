@@ -16,9 +16,9 @@
   --black: #080808;
   --shadow: 0 24px 70px rgba(0, 0, 0, 0.16);
   --radius: 18px;
-  --display: "Archivo", "Arial Black", sans-serif;
-  --body: "Barlow", Verdana, sans-serif;
-  --script: "Yellowtail", cursive;
+  --display: "Arial Black", sans-serif;
+  --body: Verdana, sans-serif;
+  --script: cursive;
 }
 
 * {
@@ -237,6 +237,7 @@ input {
 }
 
 .nav-grid {
+  position: relative;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
@@ -328,34 +329,40 @@ input {
 
 .menu {
   display: none;
-  grid-column: 1 / -1;
-  gap: 0;
-  padding: 0;
-  font-weight: 800;
-  text-transform: uppercase;
 }
 
 .menu.is-open {
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 200;
+  padding: 6px;
+  gap: 2px;
+  background: #0d0d0d;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.55);
 }
 
 .menu a {
   position: relative;
   display: flex;
   align-items: center;
-  min-height: 38px;
-  padding: 0 13px;
+  min-height: 44px;
+  padding: 0 16px;
   border: 0;
-  border-radius: 999px;
-  color: #111827;
-  font-size: 0.86rem;
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.88rem;
   font-weight: 900;
-  letter-spacing: 0;
+  letter-spacing: 0.01em;
   text-transform: none;
   transition:
-    color 0.18s ease,
-    background 0.18s ease,
-    transform 0.18s ease;
+    color 0.15s ease,
+    background 0.15s ease;
 }
 
 .menu a + a::before {
@@ -363,9 +370,9 @@ input {
 }
 
 .menu a.is-active {
-  color: #fff;
-  background: #050505;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.22);
+  color: #b8ff3c;
+  background: rgba(134, 225, 0, 0.12);
+  box-shadow: none;
 }
 
 .menu a:not(.is-active)::after {
@@ -373,9 +380,9 @@ input {
 }
 
 .menu a:not(.is-active):hover {
-  color: #050505;
-  background: rgba(134, 225, 0, 0.16);
-  transform: translateY(-1px);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  transform: none;
 }
 
 .menu a:not(.is-active):hover::after {
@@ -2557,12 +2564,19 @@ h1 {
     display: none;
   }
 
-  .menu {
+  .menu,
+  .menu.is-open {
     display: flex;
+    position: static;
+    flex-direction: row;
     grid-column: auto;
     justify-content: center;
     gap: 4px;
     padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
   }
 
   .menu a {
@@ -2570,6 +2584,20 @@ h1 {
     border-top: 0;
     border-bottom: 0;
     font-size: 0.76rem;
+    min-height: 38px;
+    color: #111827;
+    border-radius: 999px;
+  }
+
+  .menu a.is-active {
+    color: #fff;
+    background: #050505;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.22);
+  }
+
+  .menu a:not(.is-active):hover {
+    color: #050505;
+    background: rgba(134, 225, 0, 0.16);
   }
 
   .nav-search {

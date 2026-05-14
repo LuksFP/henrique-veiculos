@@ -1,5 +1,27 @@
 import type { Metadata } from "next";
+import { Archivo, Barlow, Yellowtail } from "next/font/google";
 import "./globals.css";
+
+const archivo = Archivo({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "900"],
+  variable: "--display",
+  display: "swap",
+});
+
+const barlow = Barlow({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--body",
+  display: "swap",
+});
+
+const yellowtail = Yellowtail({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--script",
+  display: "swap",
+});
 
 const BASE_URL = "https://www.henriqueveiculos.com.br";
 
@@ -30,16 +52,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="pt-BR">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=Inter:wght@400;500;600&display=swap"
-          rel="stylesheet"
-        />
-      </head>
-      <body>{children}</body>
+    <html lang="pt-BR" suppressHydrationWarning data-scroll-behavior="smooth">
+      <body suppressHydrationWarning className={`${archivo.variable} ${barlow.variable} ${yellowtail.variable}`}>
+        {children}
+      </body>
     </html>
   );
 }

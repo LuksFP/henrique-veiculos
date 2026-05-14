@@ -10,6 +10,29 @@ import { vehicleImage, vehicleSearchText, type Vehicle } from "@/lib/vehicle-sha
 const whatsappBase =
   "https://wa.me/5513974066867?text=Ol%C3%A1%2C%20vim%20pelo%20site%20e%20tenho%20interesse%20no%20ve%C3%ADculo%3A%20";
 
+function scrollToSection(id: string) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const start = window.scrollY;
+  const target = el.getBoundingClientRect().top + window.scrollY;
+  const distance = target - start;
+  const duration = 320;
+  let startTime: number | null = null;
+  function easeOut(t: number) { return 1 - (1 - t) ** 3; }
+  function step(ts: number) {
+    if (startTime === null) startTime = ts;
+    const p = Math.min((ts - startTime) / duration, 1);
+    window.scrollTo(0, start + distance * easeOut(p));
+    if (p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function navClick(e: React.MouseEvent<HTMLAnchorElement>, id: string) {
+  e.preventDefault();
+  scrollToSection(id);
+}
+
 function whatsappVehicleUrl(vehicle: Vehicle, suffix = "") {
   return `${whatsappBase}${encodeURIComponent(`${vehicle.make} ${vehicle.model} ${vehicle.year}`)}${suffix}`;
 }
@@ -32,16 +55,28 @@ function Header({
   onSearch: (value: string, shouldScroll?: boolean) => void;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const navRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (navRef.current && !navRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [menuOpen]);
 
   return (
     <header className="site-masthead">
       <div className="masthead-grid">
-        <a href="#inicio" aria-label="Henrique Veículos">
+        <a href="#inicio" aria-label="Henrique Veículos" onClick={(e) => navClick(e, "inicio")}>
           <BrandLogo />
         </a>
 
         <nav className="main-nav" aria-label="Navegação principal">
-          <div className="nav-grid">
+          <div className="nav-grid" ref={navRef}>
             <button
               className="menu-button"
               type="button"
@@ -51,11 +86,11 @@ function Header({
             >
               Menu
             </button>
-            <div id="site-menu" className={`menu ${menuOpen ? "is-open" : ""}`}>
-              <a className="is-active" href="#inicio">
+            <div id="site-menu" className={`menu ${menuOpen ? "is-open" : ""}`} onClick={() => setMenuOpen(false)}>
+              <a className="is-active" href="#inicio" onClick={(e) => navClick(e, "inicio")}>
                 Home
               </a>
-              <a href="#estoque">Estoque</a>
+              <a href="#estoque" onClick={(e) => navClick(e, "estoque")}>Estoque</a>
               <Link href="/avaliacao">Avaliação</Link>
               <Link href="/consignacao">Consignação</Link>
               <Link href="/financiamento">Financiamento</Link>
@@ -379,7 +414,7 @@ export function HomeExperience({ vehicles }: { vehicles: Vehicle[] }) {
     setSearch(value);
 
     if (value.trim() && shouldScroll) {
-      document.querySelector("#estoque")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      scrollToSection("estoque");
     }
   }
 
@@ -585,7 +620,7 @@ function Contact() {
             </li>
           ))}
         </ol>
-        <a className="outro-cta" href="#estoque">
+        <a className="outro-cta" href="#estoque" onClick={(e) => navClick(e, "estoque")}>
           <span className="outro-cta-label">Ver estoque completo</span>
           <span className="outro-cta-arrow" aria-hidden="true">
             →

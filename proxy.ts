@@ -26,10 +26,26 @@ export async function proxy(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (request.nextUrl.pathname.startsWith("/admin") && !user) {
-    const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/login";
-    return NextResponse.redirect(redirectUrl);
+  if (request.nextUrl.pathname.startsWith("/admin")) {
+    if (!user) {
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = "/login";
+      return NextResponse.redirect(loginUrl);
+    }
+
+    const { data: admin } = await supabase
+      .from("admin_users")
+      .select("is_admin")
+      .eq("user_id", user.id)
+      .eq("is_admin", true)
+      .maybeSingle();
+
+    if (!admin) {
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = "/login";
+      loginUrl.searchParams.set("error", "not-admin");
+      return NextResponse.redirect(loginUrl);
+    }
   }
 
   return response;

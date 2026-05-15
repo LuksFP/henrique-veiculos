@@ -368,16 +368,7 @@ export function HomeExperience({ vehicles }: { vehicles: Vehicle[] }) {
     return vehicles.filter((vehicle) => vehicleSearchText(vehicle).includes(term));
   }, [search, vehicles]);
 
-  const showroomList = useMemo(() => {
-    const showroomPriority = ["HB20 1.0 CONFOR", "ARGO", "HB20S", "PCX"];
-
-    return [...filteredVehicles].sort((first, second) => {
-      const firstIndex = showroomPriority.findIndex((term) => first.model.includes(term));
-      const secondIndex = showroomPriority.findIndex((term) => second.model.includes(term));
-
-      return (firstIndex === -1 ? 99 : firstIndex) - (secondIndex === -1 ? 99 : secondIndex);
-    });
-  }, [filteredVehicles]);
+  const showroomList = filteredVehicles;
 
   useEffect(() => {
     const el = dealScrollRef.current;

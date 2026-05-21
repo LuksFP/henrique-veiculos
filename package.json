@@ -7,30 +7,21 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit",
-    "supabase:types": "supabase gen types typescript --linked > lib/database.types.ts",
-    "admin:create": "node scripts/create-admin.mjs",
-    "images:migrate": "node scripts/upload-current-vehicle-images.mjs",
-    "test:e2e": "playwright test"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@supabase/ssr": "^0.10.2",
-    "@supabase/supabase-js": "^2.105.1",
     "@tailwindcss/postcss": "^4.2.4",
     "@types/node": "^25.6.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "fast-xml-parser": "^5.8.0",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.14.0",
     "next": "^16.2.4",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
-    "recharts": "^3.8.1",
     "tailwindcss": "^4.2.4",
     "typescript": "^6.0.3",
     "zod": "^4.4.1"
-  },
-  "devDependencies": {
-    "@playwright/test": "^1.59.1"
   }
 }

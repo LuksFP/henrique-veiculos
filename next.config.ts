@@ -5,8 +5,12 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
+        protocol: "http",
+        hostname: "app.revendamais.com.br",
+      },
+      {
         protocol: "https",
-        hostname: "*.supabase.co",
+        hostname: "*.revendamais.com.br",
       },
     ],
   },

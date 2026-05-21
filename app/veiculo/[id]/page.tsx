@@ -61,11 +61,7 @@ export default async function VehiclePage({ params }: Props) {
 
   if (!vehicle) notFound();
 
-  const coverUrl = vehicleImage(vehicle);
-  const galleryImages = [
-    ...(coverUrl ? [{ id: "cover", url: coverUrl }] : []),
-    ...(vehicle.vehicle_images ?? []),
-  ];
+  const galleryImages = vehicle.images.map((url, i) => ({ id: String(i), url }));
 
   const whatsappUrl = `${WHATSAPP_BASE}${encodeURIComponent(`${vehicle.make} ${vehicle.model} ${vehicle.year}`)}`;
   const financingUrl = `${whatsappUrl}%20-%20Quero%20simular%20financiamento`;

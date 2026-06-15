@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
@@ -57,6 +56,5 @@ export async function submitPublicLeadAction(formData: FormData) {
 
   if (error) redirect(`${formData.get("_origin") ?? "/"}?error=${encodeURIComponent(error.message)}`);
 
-  revalidatePath("/admin/crm");
   redirect(`${formData.get("_origin") ?? "/"}?success=1`);
 }

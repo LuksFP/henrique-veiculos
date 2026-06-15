@@ -3,57 +3,6 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type Database = {
   public: {
     Tables: {
-      expenses: {
-        Row: {
-          id: string;
-          description: string;
-          amount: number;
-          category: "aluguel" | "folha" | "manutencao" | "marketing" | "outros";
-          expense_date: string;
-          notes: string | null;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          description: string;
-          amount: number;
-          category?: "aluguel" | "folha" | "manutencao" | "marketing" | "outros";
-          expense_date?: string;
-          notes?: string | null;
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          description?: string;
-          amount?: number;
-          category?: "aluguel" | "folha" | "manutencao" | "marketing" | "outros";
-          expense_date?: string;
-          notes?: string | null;
-          created_at?: string;
-        };
-        Relationships: [];
-      };
-      admin_users: {
-        Row: {
-          created_at: string;
-          email: string;
-          is_admin: boolean;
-          user_id: string;
-        };
-        Insert: {
-          created_at?: string;
-          email: string;
-          is_admin?: boolean;
-          user_id: string;
-        };
-        Update: {
-          created_at?: string;
-          email?: string;
-          is_admin?: boolean;
-          user_id?: string;
-        };
-        Relationships: [];
-      };
       leads: {
         Row: {
           id: string;
@@ -92,55 +41,6 @@ export type Database = {
           source?: "whatsapp" | "site" | "indicacao" | "instagram" | "outro" | "avaliacao" | "consignacao" | "financiamento";
           notes?: string | null;
           updated_at?: string;
-        };
-        Relationships: [];
-      };
-      sales: {
-        Row: {
-          id: string;
-          vehicle_id: string | null;
-          make: string;
-          model: string;
-          year: number;
-          lead_id: string | null;
-          client_name: string;
-          sale_price: number;
-          cost_price: number;
-          commission: number;
-          payment_method: "a_vista" | "financiado" | "consorcio" | "troca";
-          sale_date: string;
-          notes: string | null;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          vehicle_id?: string | null;
-          make: string;
-          model: string;
-          year: number;
-          lead_id?: string | null;
-          client_name?: string;
-          sale_price: number;
-          cost_price?: number;
-          commission?: number;
-          payment_method?: "a_vista" | "financiado" | "consorcio" | "troca";
-          sale_date?: string;
-          notes?: string | null;
-          created_at?: string;
-        };
-        Update: {
-          vehicle_id?: string | null;
-          make?: string;
-          model?: string;
-          year?: number;
-          lead_id?: string | null;
-          client_name?: string;
-          sale_price?: number;
-          cost_price?: number;
-          commission?: number;
-          payment_method?: "a_vista" | "financiado" | "consorcio" | "troca";
-          sale_date?: string;
-          notes?: string | null;
         };
         Relationships: [];
       };
@@ -242,8 +142,6 @@ export type Database = {
   };
 };
 
-export type ExpenseRow = Database["public"]["Tables"]["expenses"]["Row"];
 export type VehicleRow = Database["public"]["Tables"]["vehicles"]["Row"];
 export type VehicleImageRow = Database["public"]["Tables"]["vehicle_images"]["Row"];
 export type LeadRow = Database["public"]["Tables"]["leads"]["Row"];
-export type SaleRow = Database["public"]["Tables"]["sales"]["Row"];

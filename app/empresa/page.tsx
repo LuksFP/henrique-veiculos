@@ -57,7 +57,7 @@ export default function EmpresaPage() {
               <div className="sp-address-block">
                 <p className="sp-cta-label">Onde estamos</p>
                 <p>Av. Santos Dumont, 1384, Sítio Paecara (Vicente de Carvalho) — Guarujá/SP</p>
-                <p>Segunda à sexta das 8:00 às 18:00 · Sábado das 8:00 às 14:00</p>
+                <p>Segunda à sexta das 9:00 às 18:00 · Sábado das 9:00 às 14:00</p>
                 <div className="sp-address-links">
                   <a href={MAPS} target="_blank" rel="noreferrer" className="sp-btn-cta">Como chegar</a>
                   <a href="https://wa.me/5513974066867" target="_blank" rel="noreferrer" className="sp-btn-ghost">Falar pelo WhatsApp</a>

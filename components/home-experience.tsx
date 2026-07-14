@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { BrandLogo } from "@/components/brand-logo";
 import { FacebookIcon, InstagramIcon, WhatsappIcon } from "@/components/social-icons";
 import { ShowroomLogo } from "@/components/showroom-logo";
@@ -9,23 +10,41 @@ import { vehicleImage, vehicleSearchText, type Vehicle } from "@/lib/vehicle-sha
 
 const whatsappBase =
   "https://wa.me/5513974066867?text=Ol%C3%A1%2C%20vim%20pelo%20site%20e%20tenho%20interesse%20no%20ve%C3%ADculo%3A%20";
+const navRoutes = ["/avaliacao", "/consignacao", "/financiamento", "/empresa", "/contato"];
+let activeNavScroll: number | null = null;
 
 function scrollToSection(id: string) {
   const el = document.getElementById(id);
   if (!el) return;
+  if (activeNavScroll !== null) {
+    window.cancelAnimationFrame(activeNavScroll);
+    activeNavScroll = null;
+  }
+
   const start = window.scrollY;
   const target = el.getBoundingClientRect().top + window.scrollY;
   const distance = target - start;
-  const duration = 320;
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (reduceMotion || Math.abs(distance) < 2) {
+    window.scrollTo(0, target);
+    return;
+  }
+
+  const duration = Math.min(150, Math.max(70, Math.abs(distance) / 8));
   let startTime: number | null = null;
   function easeOut(t: number) { return 1 - (1 - t) ** 3; }
   function step(ts: number) {
     if (startTime === null) startTime = ts;
     const p = Math.min((ts - startTime) / duration, 1);
     window.scrollTo(0, start + distance * easeOut(p));
-    if (p < 1) requestAnimationFrame(step);
+    if (p < 1) {
+      activeNavScroll = requestAnimationFrame(step);
+    } else {
+      activeNavScroll = null;
+    }
   }
-  requestAnimationFrame(step);
+  activeNavScroll = requestAnimationFrame(step);
 }
 
 function navClick(e: React.MouseEvent<HTMLAnchorElement>, id: string) {
@@ -56,6 +75,11 @@ function Header({
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const navRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    navRoutes.forEach((href) => router.prefetch(href));
+  }, [router]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -212,20 +236,6 @@ function Hero({ vehicles }: { vehicles: Vehicle[] }) {
           </button>
         </div>
       </div>
-      <div className="floating-social" aria-label="Redes sociais fixas">
-        <a className="social facebook" href="#contato" aria-label="Facebook">
-          f
-        </a>
-        <a className="social whatsapp" href="https://wa.me/5513974066867" target="_blank" rel="noreferrer" aria-label="WhatsApp">
-          ☎
-        </a>
-        <a className="social instagram" href="#contato" aria-label="Instagram">
-          ◎
-        </a>
-        <a className="social email" href="mailto:henrique_veiculos@hotmail.com" aria-label="Email">
-          ✉
-        </a>
-      </div>
     </section>
   );
 }
@@ -351,13 +361,63 @@ function VehicleModal({ vehicle, onClose }: { vehicle: Vehicle | null; onClose: 
   );
 }
 
-const DEAL_COUNT = 4;
+const SERVICES: { id: string; title: string; desc: string; href: string; icon: React.ReactNode }[] = [
+  {
+    id: "avaliacao",
+    title: "Avaliação",
+    desc: "Seu usado entra na troca",
+    href: "https://wa.me/5513974066867?text=Ol%C3%A1%2C%20quero%20avaliar%20meu%20ve%C3%ADculo%20na%20Henrique%20Ve%C3%ADculos",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="11" cy="11" r="7" />
+        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        <polyline points="8.5 11 10.5 13 14 9" />
+      </svg>
+    ),
+  },
+  {
+    id: "consignacao",
+    title: "Consignação",
+    desc: "Venda assistida na loja",
+    href: "https://wa.me/5513974066867?text=Ol%C3%A1%2C%20tenho%20interesse%20em%20consignar%20meu%20ve%C3%ADculo%20na%20Henrique%20Ve%C3%ADculos",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="17 1 21 5 17 9" />
+        <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+        <polyline points="7 23 3 19 7 15" />
+        <path d="M21 13v2a4 4 0 0 1-4 4H3" />
+      </svg>
+    ),
+  },
+  {
+    id: "financiamento",
+    title: "Financiamento",
+    desc: "Simulação rápida no Zap",
+    href: "https://wa.me/5513974066867?text=Ol%C3%A1%2C%20quero%20simular%20um%20financiamento%20na%20Henrique%20Ve%C3%ADculos",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="1" y="4" width="22" height="16" rx="2" />
+        <line x1="1" y1="10" x2="23" y2="10" />
+      </svg>
+    ),
+  },
+  {
+    id: "empresa",
+    title: "Empresa local",
+    desc: "Desde 2010 · Guarujá",
+    href: "https://www.google.com/maps/search/?api=1&query=Av.+Santos+Dumont+1384+Vicente+de+Carvalho+Guaruj%C3%A1+SP",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+        <circle cx="12" cy="10" r="3" />
+      </svg>
+    ),
+  },
+];
 
 export function HomeExperience({ vehicles }: { vehicles: Vehicle[] }) {
   const [search, setSearch] = useState("");
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
-  const dealScrollRef = useRef<HTMLDivElement>(null);
-  const [dealSlide, setDealSlide] = useState(0);
   const filteredVehicles = useMemo(() => {
     const term = search.trim().toLowerCase();
 
@@ -369,37 +429,6 @@ export function HomeExperience({ vehicles }: { vehicles: Vehicle[] }) {
   }, [search, vehicles]);
 
   const showroomList = filteredVehicles;
-
-  useEffect(() => {
-    const el = dealScrollRef.current;
-    if (!el) return;
-    function onScroll() {
-      if (!el) return;
-      const cardW = el.scrollWidth / DEAL_COUNT;
-      setDealSlide(Math.min(DEAL_COUNT - 1, Math.round(el.scrollLeft / cardW)));
-    }
-    el.addEventListener("scroll", onScroll, { passive: true });
-    return () => el.removeEventListener("scroll", onScroll);
-  }, []);
-
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      setDealSlide((prev) => {
-        const next = (prev + 1) % DEAL_COUNT;
-        const el = dealScrollRef.current;
-        if (el) el.scrollTo({ left: next * (el.scrollWidth / DEAL_COUNT), behavior: "smooth" });
-        return next;
-      });
-    }, 2000);
-    return () => window.clearInterval(timer);
-  }, []);
-
-  function scrollToDeal(idx: number) {
-    const el = dealScrollRef.current;
-    if (!el) return;
-    el.scrollTo({ left: idx * (el.scrollWidth / DEAL_COUNT), behavior: "smooth" });
-    setDealSlide(idx);
-  }
 
   function handleSearch(value: string, shouldScroll = false) {
     setSearch(value);
@@ -424,95 +453,22 @@ export function HomeExperience({ vehicles }: { vehicles: Vehicle[] }) {
             >
               Av. Santos Dumont, 1384, Sítio Paecara (Vicente de Carvalho) - Guarujá/SP
             </a>
-            <span>Segunda à sexta das 8:00 às 18:00 · Sábado das 8:00 às 14:00</span>
+            <span>Segunda à sexta das 9:00 às 18:00 · Sábado das 9:00 às 14:00</span>
           </div>
         </section>
 
         <section className="deal-strip" aria-label="Serviços da Henrique Veículos">
-          <div className="deal-wrap" ref={dealScrollRef}>
-            <article id="avaliacao" className="deal-card deal-card-feature">
-              <span className="deal-number">01</span>
-              <div>
-                <p className="deal-kicker">Avaliação na loja</p>
-                <h2>Seu usado entra como parte do negócio.</h2>
-              </div>
-              <p>Traga seu carro ou moto para uma avaliação direta, com proposta clara e sem etapa escondida.</p>
-              <a
-                href="https://wa.me/5513974066867?text=Ol%C3%A1%2C%20quero%20avaliar%20meu%20ve%C3%ADculo%20na%20Henrique%20Ve%C3%ADculos"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Avaliar meu veículo
+          <div className="svc-bar">
+            {SERVICES.map((service) => (
+              <a key={service.id} id={service.id} className="svc-item" href={service.href} target="_blank" rel="noreferrer">
+                <span className="svc-icon" aria-hidden="true">
+                  {service.icon}
+                </span>
+                <span className="svc-title">{service.title}</span>
+                <span className="svc-desc">{service.desc}</span>
+                <span className="svc-arrow" aria-hidden="true">→</span>
               </a>
-            </article>
-            <article id="consignacao" className="deal-card">
-              <span className="deal-number">02</span>
-              <p className="deal-kicker">Consignação</p>
-              <h3>Venda assistida</h3>
-              <p>Anuncie com apoio da loja, atendimento no ponto físico e negociação acompanhada.</p>
-              <a
-                href="https://wa.me/5513974066867?text=Ol%C3%A1%2C%20tenho%20interesse%20em%20consignar%20meu%20ve%C3%ADculo%20na%20Henrique%20Ve%C3%ADculos"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Quero consignar
-              </a>
-            </article>
-            <article id="financiamento" className="deal-card">
-              <span className="deal-number">03</span>
-              <p className="deal-kicker">Financiamento</p>
-              <h3>Simulação rápida</h3>
-              <p>Condições consultadas por WhatsApp para você entender entrada, parcelas e aprovação.</p>
-              <a
-                href="https://wa.me/5513974066867?text=Ol%C3%A1%2C%20quero%20simular%20um%20financiamento%20na%20Henrique%20Ve%C3%ADculos"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Simular financiamento
-              </a>
-            </article>
-            <article id="empresa" className="deal-card">
-              <span className="deal-number">04</span>
-              <p className="deal-kicker">Empresa local</p>
-              <h3>Desde 2010</h3>
-              <p>Atendimento presencial em Vicente de Carvalho, Guarujá, com estoque selecionado.</p>
-              <a
-                href="https://www.google.com/maps/search/?api=1&query=Av.+Santos+Dumont+1384+Vicente+de+Carvalho+Guaruj%C3%A1+SP"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Como chegar
-              </a>
-            </article>
-          </div>
-          <div className="deal-nav">
-            <button
-              className="deal-arrow"
-              type="button"
-              aria-label="Anterior"
-              onClick={() => scrollToDeal((dealSlide - 1 + DEAL_COUNT) % DEAL_COUNT)}
-            >
-              ‹
-            </button>
-            <div className="deal-dots">
-              {Array.from({ length: DEAL_COUNT }, (_, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  aria-label={`Ir para slide ${i + 1}`}
-                  className={`deal-dot${dealSlide === i ? " is-active" : ""}`}
-                  onClick={() => scrollToDeal(i)}
-                />
-              ))}
-            </div>
-            <button
-              className="deal-arrow"
-              type="button"
-              aria-label="Próximo"
-              onClick={() => scrollToDeal((dealSlide + 1) % DEAL_COUNT)}
-            >
-              ›
-            </button>
+            ))}
           </div>
         </section>
 
@@ -567,84 +523,55 @@ export function HomeExperience({ vehicles }: { vehicles: Vehicle[] }) {
 function Contact() {
   return (
     <section id="contato" className="contact">
-      <div className="ticker" aria-hidden="true">
-        <div className="ticker-track">
-          {["Encontre · Negocie · Leve pra casa", "Desde 2010", "Guarujá - SP", "Seminovos selecionados", "Financiamento próprio"].map((item) => (
-            <span key={item}>{item}</span>
-          ))}
-        </div>
-      </div>
-      <div className="outro">
-        <div className="outro-head">
-          <div className="outro-kicker">
-            <span className="outro-num">04</span>
-            <span className="outro-label">Visite · Conecte</span>
-          </div>
-          <h2 className="outro-title">
-            Venha <span className="outro-italic">tomar um café</span> e ver o <span className="outro-stamp">carro</span> de perto.
+      <div className="contact-shell">
+        <div className="contact-lead">
+          <span className="contact-eyebrow">Visite a loja</span>
+          <h2 className="contact-heading">
+            Venha ver o carro <span className="contact-heading-italic">de perto</span>.
           </h2>
-          <p className="outro-lede">Loja física no Guarujá. Atendimento de segunda a sábado. Aceitamos seu usado na troca.</p>
+          <p className="contact-sub">Loja física no Guarujá · Aceitamos seu usado na troca.</p>
+          <a className="contact-whats" href="https://wa.me/5513974066867" target="_blank" rel="noreferrer">
+            <WhatsappIcon />
+            Falar no WhatsApp
+          </a>
         </div>
-        <ol className="outro-list">
-          {[
-            ["01", "Instagram", "@henriqueveiculos", "#", "novidades · ofertas"],
-            ["02", "Facebook", "Henrique Veículos", "#", "vídeos · estoque"],
-            ["03", "WhatsApp", "(13) 97406-6867", "https://wa.me/5513974066867", "resposta rápida"],
-            [
-              "04",
-              "Endereço",
-              "Av. Santos Dumont, 1384",
-              "https://www.google.com/maps/search/?api=1&query=Av.%20Santos%20Dumont%2C%201384%20S%C3%ADtio%20Paecara%20Guaruj%C3%A1%20SP",
-              "Guarujá / SP",
-            ],
-          ].map(([num, label, value, href, meta]) => (
-            <li className="outro-item" key={num}>
-              <span className="outro-item-num">{num}</span>
-              <div className="outro-item-body">
-                <span className="outro-item-label">{label}</span>
-                <a className="outro-item-link" href={href} target="_blank" rel="noreferrer">
-                  {value}
-                  <span className="arrow">↗</span>
-                </a>
-              </div>
-              <span className="outro-item-meta">{meta}</span>
-            </li>
-          ))}
-        </ol>
-        <a className="outro-cta" href="#estoque" onClick={(e) => navClick(e, "estoque")}>
-          <span className="outro-cta-label">Ver estoque completo</span>
-          <span className="outro-cta-arrow" aria-hidden="true">
-            →
-          </span>
-        </a>
-      </div>
-      <div className="footer-main">
-        <div className="footer-wordmark" aria-hidden="true">
-          <span className="footer-wordmark-text">HENRIQUE</span>
-          <span className="footer-wordmark-flag" />
-          <span className="footer-wordmark-text light">VEÍCULOS</span>
-        </div>
-        <div className="footer-meta">
-          <div className="footer-meta-col">
-            <span className="footer-meta-label">Telefone</span>
-            <a href="tel:+551321912176">(13) 2191-2176</a>
-            <a href="tel:+5513974066867">(13) 97406-6867</a>
+
+        <dl className="contact-facts">
+          <div className="contact-fact">
+            <dt>Endereço</dt>
+            <dd>
+              <a
+                href="https://www.google.com/maps/search/?api=1&query=Av.%20Santos%20Dumont%2C%201384%20S%C3%ADtio%20Paecara%20Guaruj%C3%A1%20SP"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Av. Santos Dumont, 1384 — Vicente de Carvalho, Guarujá/SP
+              </a>
+            </dd>
           </div>
-          <div className="footer-meta-col">
-            <span className="footer-meta-label">E-mail</span>
-            <a href="mailto:henrique_veiculos@hotmail.com">henrique_veiculos@hotmail.com</a>
+          <div className="contact-fact">
+            <dt>Horário</dt>
+            <dd>
+              Seg a Sex · 9h–18h
+              <br />
+              Sábado · 9h–14h
+            </dd>
           </div>
-          <div className="footer-meta-col">
-            <span className="footer-meta-label">Horário</span>
-            <span>Seg-Sex / 8h-18h</span>
-            <span>Sáb / 8h-14h</span>
+          <div className="contact-fact">
+            <dt>Telefone</dt>
+            <dd>
+              <a href="tel:+5513974066867">(13) 97406-6867</a>
+            </dd>
           </div>
-          <div className="footer-meta-col">
-            <span className="footer-meta-label">Loja</span>
-            <span>Av. Santos Dumont, 1384</span>
-            <span>Vicente de Carvalho · Guarujá / SP</span>
+          <div className="contact-fact">
+            <dt>Instagram</dt>
+            <dd>
+              <a href="https://instagram.com/henriqueveiculos" target="_blank" rel="noreferrer">
+                @henriqueveiculos
+              </a>
+            </dd>
           </div>
-        </div>
+        </dl>
       </div>
     </section>
   );

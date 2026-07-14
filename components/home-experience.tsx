@@ -393,6 +393,93 @@ const SERVICES: { id: string; title: string; desc: string; href: string; icon: R
   },
 ];
 
+const REASONS: { highlight?: boolean; title: string; desc: string; icon: React.ReactNode }[] = [
+  {
+    highlight: true,
+    title: "Procedência garantida",
+    desc: 'Todo carro é revisado e tem o histórico checado antes de entrar no pátio. Você compra sabendo o que está levando — nada de surpresa depois.',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        <polyline points="9 12 11 14 15 10" />
+      </svg>
+    ),
+  },
+  {
+    title: "Seu usado na troca",
+    desc: "Avaliamos seu veículo na hora e ele entra como parte do pagamento. Menos burocracia pra você trocar de carro.",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="17 1 21 5 17 9" />
+        <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+        <polyline points="7 23 3 19 7 15" />
+        <path d="M21 13v2a4 4 0 0 1-4 4H3" />
+      </svg>
+    ),
+  },
+  {
+    title: "Financiamento facilitado",
+    desc: "Simulação rápida direto no WhatsApp, com as melhores taxas e aprovação sem complicação. A gente resolve pra você.",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="1" y="4" width="22" height="16" rx="2" />
+        <line x1="1" y1="10" x2="23" y2="10" />
+      </svg>
+    ),
+  },
+  {
+    title: "Atendimento de verdade",
+    desc: "Loja física no Guarujá desde 2010. Gente de verdade do outro lado da linha, antes e depois da venda.",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="9" />
+        <circle cx="12" cy="12" r="3.4" />
+        <line x1="4.9" y1="4.9" x2="9.6" y2="9.6" />
+        <line x1="14.4" y1="14.4" x2="19.1" y2="19.1" />
+        <line x1="14.4" y1="9.6" x2="19.1" y2="4.9" />
+        <line x1="4.9" y1="19.1" x2="9.6" y2="14.4" />
+      </svg>
+    ),
+  },
+];
+
+function WhyUs() {
+  return (
+    <section className="whyus" aria-label="Por que comprar na Henrique Veículos">
+      <div className="whyus-wrap">
+        <div className="whyus-lead reveal">
+          <span className="whyus-eyebrow">
+            <em>01</em> A Henrique
+          </span>
+          <h2 className="whyus-heading">
+            A experiência que transforma pesquisa em <span className="accent">carro na garagem</span>.
+          </h2>
+          <p className="whyus-sub">
+            No Guarujá desde 2010, a gente sabe que comprar carro é decisão grande. Por isso cada veículo é revisado e
+            com procedência checada, e você tem acompanhamento do test-drive à documentação.
+          </p>
+          <a className="whyus-link" href="#estoque" onClick={(event) => navClick(event, "estoque")}>
+            Ver estoque completo <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+        <div className="whyus-grid">
+          {REASONS.map((reason) => (
+            <article className={`whyus-card ${reason.highlight ? "is-highlight" : ""}`} key={reason.title}>
+              <span className="whyus-icon" aria-hidden="true">
+                {reason.icon}
+              </span>
+              <div className="whyus-card-text">
+                <h3>{reason.title}</h3>
+                <p>{reason.desc}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export function HomeExperience({ vehicles }: { vehicles: Vehicle[] }) {
   const [search, setSearch] = useState("");
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
@@ -421,6 +508,8 @@ export function HomeExperience({ vehicles }: { vehicles: Vehicle[] }) {
       <Header search={search} onSearch={handleSearch} />
       <main id="inicio">
         <Hero vehicles={vehicles} />
+
+        <WhyUs />
 
         <section className="address-bar" aria-label="Endereço e horário">
           <div className="wrap address-grid">

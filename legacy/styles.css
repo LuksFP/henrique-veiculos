@@ -788,6 +788,182 @@ input {
   display: none;
 }
 
+/* ====== seção "por que a Henrique" ====== */
+.whyus {
+  background: var(--off);
+  color: var(--ink);
+  padding: clamp(58px, 9vh, 108px) 24px;
+}
+
+.whyus-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1.12fr;
+  gap: clamp(30px, 5vw, 72px);
+  align-items: center;
+}
+
+.whyus-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--body);
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 22px;
+}
+
+.whyus-eyebrow em {
+  font-style: normal;
+  color: var(--red-dark);
+  border: 1px solid rgba(78, 133, 0, 0.4);
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-size: 0.7rem;
+}
+
+.whyus-heading {
+  font-family: var(--display);
+  font-weight: 900;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  font-size: clamp(1.9rem, 4vw, 3.1rem);
+  margin: 0 0 20px;
+}
+
+.whyus-heading .accent {
+  position: relative;
+  color: var(--red-dark);
+}
+
+.whyus-heading .accent::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0.02em;
+  height: 0.08em;
+  background: var(--lime);
+  border-radius: 999px;
+}
+
+.whyus-sub {
+  font-family: var(--body);
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--ink-soft);
+  max-width: 440px;
+  margin: 0 0 28px;
+}
+
+.whyus-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--body);
+  font-weight: 700;
+  color: var(--ink);
+  border-bottom: 2px solid var(--lime);
+  padding-bottom: 4px;
+  transition: gap 0.18s ease, color 0.18s ease;
+}
+
+.whyus-link:hover {
+  gap: 12px;
+  color: var(--red-dark);
+}
+
+.whyus-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: clamp(14px, 1.6vw, 22px);
+}
+
+.whyus-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 216px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: clamp(20px, 2vw, 28px);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.whyus-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
+}
+
+.whyus-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(134, 225, 0, 0.14);
+  color: var(--red-dark);
+}
+
+.whyus-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.whyus-card-text {
+  margin-top: auto;
+}
+
+.whyus-card h3 {
+  font-family: var(--display);
+  font-size: 1.16rem;
+  margin: 0 0 8px;
+}
+
+.whyus-card p {
+  font-family: var(--body);
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+.whyus-card.is-highlight {
+  background: var(--asphalt);
+  border-color: transparent;
+  color: #fff;
+}
+
+.whyus-card.is-highlight h3 {
+  color: #fff;
+}
+
+.whyus-card.is-highlight p {
+  color: rgba(223, 231, 209, 0.75);
+}
+
+.whyus-card.is-highlight .whyus-icon {
+  background: var(--lime);
+  color: #0a0f06;
+}
+
+@media (max-width: 900px) {
+  .whyus-wrap {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .whyus-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .lime-panel {
   display: none;
   position: absolute;

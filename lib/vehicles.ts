@@ -5,7 +5,7 @@ const XML_URL =
   "http://app.revendamais.com.br/application/index.php/apiGeneratorXml/generator/sitedaloja/5e683f76d9dc70ce206baf0bb01cdc3c5626.xml";
 
 const parser = new XMLParser({
-  isArray: (name) => name === "AD" || name === "IMAGE",
+  isArray: (name) => name === "AD" || name === "IMAGE_URL",
   ignoreAttributes: false,
 });
 
@@ -22,8 +22,8 @@ function parseImages(images: unknown): string[] {
   }
   if (typeof images === "object" && images !== null) {
     const obj = images as Record<string, unknown>;
-    if ("IMAGE" in obj) {
-      const imgs = obj.IMAGE;
+    if ("IMAGE_URL" in obj) {
+      const imgs = obj.IMAGE_URL;
       return Array.isArray(imgs) ? (imgs as string[]) : [String(imgs)];
     }
   }

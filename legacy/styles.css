@@ -558,16 +558,234 @@ input {
 
 .hero {
   position: relative;
-  min-height: 460px;
+  min-height: clamp(560px, 80vh, 800px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
   color: #fff;
-  background: #000;
+  background: var(--asphalt);
+  isolation: isolate;
 }
 
-.hero-stage {
+/* ---- carros do estoque passando no fundo ---- */
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(12px, 2vw, 24px);
+  opacity: 0.55;
+}
+
+.hero-row {
+  display: flex;
+  gap: clamp(12px, 2vw, 24px);
+  width: max-content;
+  will-change: transform;
+}
+
+.hero-row--top {
+  animation: hero-drift-left 65s linear infinite;
+}
+
+.hero-row--bottom {
+  animation: hero-drift-right 85s linear infinite;
+}
+
+.hero-frame {
+  flex: 0 0 auto;
+  width: clamp(220px, 24vw, 360px);
+  height: clamp(150px, 16vw, 230px);
+  border-radius: 14px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes hero-drift-left {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes hero-drift-right {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0); }
+}
+
+/* ---- vinheta escura por cima das fotos ---- */
+.hero-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(120% 92% at 50% 42%, rgba(5, 7, 5, 0.5) 0%, rgba(5, 7, 5, 0.85) 56%, var(--asphalt) 100%),
+    linear-gradient(180deg, rgba(5, 7, 5, 0.72) 0%, rgba(5, 7, 5, 0.18) 32%, rgba(5, 7, 5, 0.82) 100%);
+}
+
+/* ---- conteúdo central ---- */
+.hero-inner {
   position: relative;
-  min-height: 460px;
-  background: #000;
+  z-index: 2;
+  width: 100%;
+  max-width: 880px;
+  padding: clamp(56px, 9vh, 110px) 24px clamp(44px, 7vh, 80px);
+  text-align: center;
+}
+
+.hero-eyebrow {
+  display: inline-block;
+  font-family: var(--body);
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--lime-bright);
+  padding: 7px 16px;
+  border: 1px solid rgba(166, 255, 26, 0.35);
+  border-radius: 999px;
+  background: rgba(134, 225, 0, 0.08);
+  margin-bottom: clamp(18px, 3vh, 28px);
+}
+
+.hero-headline {
+  font-family: var(--display);
+  font-weight: 900;
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+  font-size: clamp(2.5rem, 7vw, 5.2rem);
+  margin: 0 0 clamp(16px, 3vh, 26px);
+  text-shadow: 0 8px 40px rgba(0, 0, 0, 0.55);
+}
+
+.hero-headline .accent {
+  position: relative;
+  color: var(--lime-bright);
+}
+
+.hero-headline .accent::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0.05em;
+  height: 0.09em;
+  background: var(--lime);
+  border-radius: 999px;
+}
+
+.hero-lede {
+  font-family: var(--body);
+  font-size: clamp(0.98rem, 1.5vw, 1.16rem);
+  line-height: 1.6;
+  color: rgba(223, 231, 209, 0.82);
+  max-width: 620px;
+  margin: 0 auto clamp(26px, 4vh, 38px);
+}
+
+.hero-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  justify-content: center;
+  margin-bottom: clamp(24px, 4vh, 36px);
+}
+
+.hero-cta .button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 15px 30px;
+  border-radius: 999px;
+  font-family: var(--body);
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.hero-cta .button.primary {
+  background: linear-gradient(135deg, var(--lime-bright), var(--lime));
+  color: #0a0f06;
+  box-shadow: 0 14px 34px rgba(134, 225, 0, 0.35);
+}
+
+.hero-cta .button.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 44px rgba(134, 225, 0, 0.5);
+}
+
+.hero-cta .button.ghost {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.hero-cta .button.ghost:hover {
+  background: rgba(255, 255, 255, 0.13);
+  transform: translateY(-2px);
+}
+
+.hero-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(16px, 3vw, 32px);
+  justify-content: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-family: var(--body);
+  font-size: 0.9rem;
+  color: rgba(223, 231, 209, 0.9);
+}
+
+.hero-badges li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hero-badges li::before {
+  content: "✓";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: rgba(134, 225, 0, 0.18);
+  color: var(--lime-bright);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+@media (max-width: 640px) {
+  .hero {
+    min-height: 540px;
+  }
+  .hero-frame {
+    width: 62vw;
+    height: 42vw;
+  }
+  .hero-cta .button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-row--top,
+  .hero-row--bottom {
+    animation: none;
+  }
+}
+
+/* ---- hero antigo (carrossel) — mantido oculto ---- */
+.hero-stage {
+  display: none;
 }
 
 .lime-panel {

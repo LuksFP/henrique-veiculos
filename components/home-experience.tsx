@@ -160,81 +160,59 @@ function Header({
 }
 
 function Hero({ vehicles }: { vehicles: Vehicle[] }) {
-  const highlights = vehicles.filter((vehicle) => vehicle.is_featured).slice(0, 3);
-  const slides = highlights.length ? highlights : vehicles.slice(0, 3);
-  const [activeSlide, setActiveSlide] = useState(0);
+  const images = useMemo(
+    () => vehicles.map((vehicle) => vehicleImage(vehicle)).filter((src): src is string => Boolean(src)),
+    [vehicles],
+  );
 
-  useEffect(() => {
-    if (slides.length < 2) return;
-
-    const timer = window.setInterval(() => {
-      setActiveSlide((value) => (value + 1) % slides.length);
-    }, 4200);
-
-    return () => window.clearInterval(timer);
-  }, [slides.length]);
+  // Duas faixas de carros deslizando em sentidos opostos no fundo.
+  // Duplicamos cada lista para o loop ficar contínuo (sem "salto").
+  const half = Math.floor(images.length / 2);
+  const rowTop = images.length ? [...images, ...images] : [];
+  const shifted = images.length ? [...images.slice(half), ...images.slice(0, half)] : [];
+  const rowBottom = shifted.length ? [...shifted, ...shifted] : [];
 
   return (
     <section className="hero">
-      <div className="hero-stage">
-        <div className="lime-panel" aria-hidden="true" />
-        <div className="hero-carousel reveal" aria-label="Destaques da semana em carrossel">
-          <button
-            className="carousel-arrow carousel-prev"
-            type="button"
-            aria-label="Destaque anterior"
-            onClick={() => setActiveSlide((value) => (value - 1 + slides.length) % slides.length)}
-          >
-            ‹
-          </button>
-          <div className="carousel-slides">
-            {slides.map((vehicle, index) => (
-              <article className={`carousel-slide ${index === activeSlide ? "is-active" : ""}`} key={vehicle.id}>
-                <div className="carousel-copy">
-                  <span className="title-flame" aria-hidden="true" />
-                  <p>Destaque da Semana</p>
-                  <h1>
-                    {vehicle.make} {vehicle.model}
-                  </h1>
-                  <div className="carousel-actions">
-                    <strong>{vehicle.price}</strong>
-                    <a className="button primary" href={whatsappVehicleUrl(vehicle)} target="_blank" rel="noreferrer">
-                      Consultar no WhatsApp
-                    </a>
-                  </div>
-                  <div className="carousel-meta">
-                    <span>{vehicle.year}</span>
-                    <span>{vehicle.transmission}</span>
-                    <span>{vehicle.fuel}</span>
-                    <span>{vehicle.color || "Consulte"}</span>
-                  </div>
-                </div>
-                <div className="carousel-photo">
-                  <VehicleImage vehicle={vehicle} />
-                </div>
-              </article>
-            ))}
-          </div>
-          <div className="carousel-dots" aria-label="Navegação do carrossel">
-            {slides.map((vehicle, index) => (
-              <button
-                key={vehicle.id}
-                className={`carousel-dot ${index === activeSlide ? "is-active" : ""}`}
-                type="button"
-                aria-label={`Ver destaque ${index + 1}`}
-                onClick={() => setActiveSlide(index)}
-              />
-            ))}
-          </div>
-          <button
-            className="carousel-arrow carousel-next"
-            type="button"
-            aria-label="Próximo destaque"
-            onClick={() => setActiveSlide((value) => (value + 1) % slides.length)}
-          >
-            ›
-          </button>
+      <div className="hero-bg" aria-hidden="true">
+        <div className="hero-row hero-row--top">
+          {rowTop.map((src, index) => (
+            <span className="hero-frame" key={`t-${index}`} style={{ backgroundImage: `url(${src})` }} />
+          ))}
         </div>
+        <div className="hero-row hero-row--bottom">
+          {rowBottom.map((src, index) => (
+            <span className="hero-frame" key={`b-${index}`} style={{ backgroundImage: `url(${src})` }} />
+          ))}
+        </div>
+      </div>
+
+      <div className="hero-scrim" aria-hidden="true" />
+
+      <div className="hero-inner reveal">
+        <span className="hero-eyebrow">Henrique Veículos · Guarujá desde 2010</span>
+        <h1 className="hero-headline">
+          O carro certo no <span className="accent">ritmo</span>
+          <br />
+          da sua vida.
+        </h1>
+        <p className="hero-lede">
+          Seminovos revisados, procedência garantida e financiamento facilitado. Você escolhe pelo site e a gente cuida
+          do resto — da avaliação do seu usado à documentação.
+        </p>
+        <div className="hero-cta">
+          <a className="button primary" href="#estoque" onClick={(event) => navClick(event, "estoque")}>
+            Ver estoque <span aria-hidden="true">↗</span>
+          </a>
+          <a className="button ghost" href="https://wa.me/5513974066867" target="_blank" rel="noreferrer">
+            Falar no WhatsApp
+          </a>
+        </div>
+        <ul className="hero-badges" aria-label="Diferenciais">
+          <li>Procedência garantida</li>
+          <li>Seu usado na troca</li>
+          <li>Financiamento facilitado</li>
+        </ul>
       </div>
     </section>
   );

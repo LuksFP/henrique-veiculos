@@ -393,55 +393,30 @@ const SERVICES: { id: string; title: string; desc: string; href: string; icon: R
   },
 ];
 
-const REASONS: { highlight?: boolean; title: string; desc: string; icon: React.ReactNode }[] = [
-  {
-    highlight: true,
-    title: "Procedência garantida",
-    desc: 'Todo carro é revisado e tem o histórico checado antes de entrar no pátio. Você compra sabendo o que está levando — nada de surpresa depois.',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-        <polyline points="9 12 11 14 15 10" />
-      </svg>
-    ),
-  },
-  {
-    title: "Seu usado na troca",
-    desc: "Avaliamos seu veículo na hora e ele entra como parte do pagamento. Menos burocracia pra você trocar de carro.",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="17 1 21 5 17 9" />
-        <path d="M3 11V9a4 4 0 0 1 4-4h14" />
-        <polyline points="7 23 3 19 7 15" />
-        <path d="M21 13v2a4 4 0 0 1-4 4H3" />
-      </svg>
-    ),
-  },
-  {
-    title: "Financiamento facilitado",
-    desc: "Simulação rápida direto no WhatsApp, com as melhores taxas e aprovação sem complicação. A gente resolve pra você.",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="1" y="4" width="22" height="16" rx="2" />
-        <line x1="1" y1="10" x2="23" y2="10" />
-      </svg>
-    ),
-  },
-  {
-    title: "Atendimento de verdade",
-    desc: "Loja física no Guarujá desde 2010. Gente de verdade do outro lado da linha, antes e depois da venda.",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="9" />
-        <circle cx="12" cy="12" r="3.4" />
-        <line x1="4.9" y1="4.9" x2="9.6" y2="9.6" />
-        <line x1="14.4" y1="14.4" x2="19.1" y2="19.1" />
-        <line x1="14.4" y1="9.6" x2="19.1" y2="4.9" />
-        <line x1="4.9" y1="19.1" x2="9.6" y2="14.4" />
-      </svg>
-    ),
-  },
+const MARQUEE_ITEMS = [
+  "Procedência garantida",
+  "Seu usado na troca",
+  "Financiamento facilitado",
+  "Seminovos revisados",
+  "Guarujá desde 2010",
+  "Atendimento de verdade",
 ];
+
+function Marquee() {
+  const loop = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS];
+  return (
+    <div className="marquee" aria-hidden="true">
+      <div className="marquee__track">
+        {loop.map((item, index) => (
+          <span className="marquee__item" key={index}>
+            <span className="marquee__label">{item}</span>
+            <span className="marquee__dot" />
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function WhyUs() {
   return (
@@ -463,16 +438,23 @@ function WhyUs() {
           </a>
         </div>
         <div className="whyus-grid">
-          {REASONS.map((reason) => (
-            <article className={`whyus-card ${reason.highlight ? "is-highlight" : ""}`} key={reason.title}>
+          {SERVICES.map((service, index) => (
+            <a
+              className={`whyus-card ${index === 0 ? "is-highlight" : ""}`}
+              key={service.id}
+              id={service.id}
+              href={service.href}
+              target="_blank"
+              rel="noreferrer"
+            >
               <span className="whyus-icon" aria-hidden="true">
-                {reason.icon}
+                {service.icon}
               </span>
               <div className="whyus-card-text">
-                <h3>{reason.title}</h3>
-                <p>{reason.desc}</p>
+                <h3>{service.title}</h3>
+                <p>{service.desc}</p>
               </div>
-            </article>
+            </a>
           ))}
         </div>
       </div>
@@ -524,21 +506,6 @@ export function HomeExperience({ vehicles }: { vehicles: Vehicle[] }) {
           </div>
         </section>
 
-        <section className="deal-strip" aria-label="Serviços da Henrique Veículos">
-          <div className="svc-bar">
-            {SERVICES.map((service) => (
-              <a key={service.id} id={service.id} className="svc-item" href={service.href} target="_blank" rel="noreferrer">
-                <span className="svc-icon" aria-hidden="true">
-                  {service.icon}
-                </span>
-                <span className="svc-title">{service.title}</span>
-                <span className="svc-desc">{service.desc}</span>
-                <span className="svc-arrow" aria-hidden="true">→</span>
-              </a>
-            ))}
-          </div>
-        </section>
-
         <section id="estoque" className="showroom-section">
           <div className="showroom-wrap">
             <header className="showroom-header">
@@ -575,6 +542,8 @@ export function HomeExperience({ vehicles }: { vehicles: Vehicle[] }) {
       <a className="whatsapp-float" href="https://wa.me/5513974066867" target="_blank" rel="noreferrer" aria-label="Chamar no WhatsApp">
         <WhatsappIcon />
       </a>
+
+      <Marquee />
 
       <footer className="footer">
         <div className="wrap footer-grid">

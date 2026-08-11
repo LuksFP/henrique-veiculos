@@ -2,6 +2,11 @@
 
 import { useEffect, useRef, type ReactNode } from "react";
 
+// Só escondemos o que está confortavelmente abaixo da dobra. O que já está
+// na tela nunca fica invisível — nem enquanto a hidratação não terminou,
+// nem se o JS falhar.
+const HIDE_BELOW = 0.85;
+
 export function ScrollReveal({
   children,
   className,
@@ -16,6 +21,11 @@ export function ScrollReveal({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (el.getBoundingClientRect().top <= window.innerHeight * HIDE_BELOW) return;
+
+    el.classList.add("will-reveal");
+
     const obs = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {

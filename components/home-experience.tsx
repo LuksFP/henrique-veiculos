@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { BrandLogo } from "@/components/brand-logo";
 import { FacebookIcon, InstagramIcon, WhatsappIcon } from "@/components/social-icons";
 import { ShowroomLogo } from "@/components/showroom-logo";
+import { CountUp, useReveal, useScrollMotion, useTilt } from "@/components/site-motion";
 import { vehicleImage, vehicleSearchText, type Vehicle } from "@/lib/vehicle-shared";
 
 const whatsappBase =
@@ -174,7 +175,7 @@ function Hero({ vehicles }: { vehicles: Vehicle[] }) {
 
   return (
     <section className="hero">
-      <div className="hero-bg" aria-hidden="true">
+      <div className="hero-bg" data-parallax="0.16" aria-hidden="true">
         <div className="hero-row hero-row--top">
           {rowTop.map((src, index) => (
             <span className="hero-frame" key={`t-${index}`} style={{ backgroundImage: `url(${src})` }} />
@@ -187,9 +188,9 @@ function Hero({ vehicles }: { vehicles: Vehicle[] }) {
         </div>
       </div>
 
-      <div className="hero-scrim" aria-hidden="true" />
+      <div className="hero-scrim" data-parallax="0.06" aria-hidden="true" />
 
-      <div className="hero-inner reveal">
+      <div className="hero-inner reveal" data-parallax="-0.09" data-fade-out>
         <span className="hero-eyebrow">Henrique Veículos · Guarujá desde 2010</span>
         <h1 className="hero-headline">
           O carro certo no <span className="accent">ritmo</span>
@@ -218,9 +219,14 @@ function Hero({ vehicles }: { vehicles: Vehicle[] }) {
   );
 }
 
-function StockRow({ vehicle, onOpen }: { vehicle: Vehicle; onOpen: () => void }) {
+function StockRow({ vehicle, index, onOpen }: { vehicle: Vehicle; index: number; onOpen: () => void }) {
   return (
-    <article className="stock-row" data-search={vehicleSearchText(vehicle)}>
+    <article
+      className="stock-row"
+      data-search={vehicleSearchText(vehicle)}
+      data-reveal
+      style={{ "--i": Math.min(index, 7) } as React.CSSProperties}
+    >
       <div className="showroom-media">
         <VehicleImage vehicle={vehicle} />
         <span className="year-badge">{vehicle.year}</span>
@@ -446,6 +452,9 @@ function WhyUs() {
               href={service.href}
               target="_blank"
               rel="noreferrer"
+              data-tilt
+              data-reveal
+              style={{ "--i": index } as React.CSSProperties}
             >
               <span className="whyus-icon" aria-hidden="true">
                 {service.icon}
@@ -477,6 +486,10 @@ export function HomeExperience({ vehicles }: { vehicles: Vehicle[] }) {
 
   const showroomList = filteredVehicles;
 
+  useScrollMotion();
+  useTilt();
+  useReveal(showroomList.length);
+
   function handleSearch(value: string, shouldScroll = false) {
     setSearch(value);
 
@@ -487,13 +500,16 @@ export function HomeExperience({ vehicles }: { vehicles: Vehicle[] }) {
 
   return (
     <>
+      <div className="scroll-progress" aria-hidden="true">
+        <span className="scroll-progress-fill" />
+      </div>
       <Header search={search} onSearch={handleSearch} />
       <main id="inicio">
         <Hero vehicles={vehicles} />
 
         <WhyUs />
 
-        <section className="address-bar" aria-label="Endereço e horário">
+        <section className="address-bar" data-reveal aria-label="Endereço e horário">
           <div className="wrap address-grid">
             <a
               href="https://www.google.com/maps/search/?api=1&query=Av.%20Santos%20Dumont%2C%201384%20S%C3%ADtio%20Paecara%20Guaruj%C3%A1%20SP"
@@ -508,7 +524,7 @@ export function HomeExperience({ vehicles }: { vehicles: Vehicle[] }) {
 
         <section id="estoque" className="showroom-section">
           <div className="showroom-wrap">
-            <header className="showroom-header">
+            <header className="showroom-header" data-reveal>
               <div>
                 <span className="showroom-eyebrow">Estoque completo</span>
                 <h2 className="showroom-title">Encontre seu próximo carro</h2>
@@ -517,7 +533,7 @@ export function HomeExperience({ vehicles }: { vehicles: Vehicle[] }) {
               <div className="showroom-count">
                 {showroomList.length ? (
                   <>
-                    <strong>{showroomList.length}</strong> {showroomList.length === 1 ? "veículo disponível" : "veículos disponíveis"}
+                    <CountUp value={showroomList.length} /> {showroomList.length === 1 ? "veículo disponível" : "veículos disponíveis"}
                   </>
                 ) : (
                   "Nenhum veículo encontrado"
@@ -527,7 +543,14 @@ export function HomeExperience({ vehicles }: { vehicles: Vehicle[] }) {
             <div className="showroom-layout">
               <div className="stock-list">
                 {showroomList.length ? (
-                  showroomList.map((vehicle) => <StockRow key={vehicle.id} vehicle={vehicle} onOpen={() => setSelectedVehicle(vehicle)} />)
+                  showroomList.map((vehicle, index) => (
+                    <StockRow
+                      key={vehicle.id}
+                      vehicle={vehicle}
+                      index={index}
+                      onOpen={() => setSelectedVehicle(vehicle)}
+                    />
+                  ))
                 ) : (
                   <p className="empty-stock">Nenhum veículo encontrado. Tente buscar por marca, modelo ou ano.</p>
                 )}
@@ -572,7 +595,7 @@ function Contact() {
           </a>
         </div>
 
-        <dl className="contact-facts">
+        <dl className="contact-facts" data-reveal>
           <div className="contact-fact">
             <dt>Endereço</dt>
             <dd>

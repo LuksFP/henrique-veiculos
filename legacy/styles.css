@@ -4509,13 +4509,13 @@ a.sp-contact-value:hover {
   animation: rise 0.6s cubic-bezier(0.2, 0, 0, 1) both;
 }
 
-.sp-reveal {
+.sp-reveal.will-reveal {
   opacity: 0;
   transform: translateY(28px);
   transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.2, 0, 0, 1);
 }
 
-.sp-reveal[data-visible="1"] {
+.sp-reveal.will-reveal[data-visible="1"] {
   opacity: 1;
   transform: translateY(0);
 }
@@ -5038,3 +5038,815 @@ body:not(:has(.adm-shell)) .ticker {
   }
 }
 /* FIM BARRA DE SERVIÇOS */
+
+/* ── Micro-interações das páginas de serviço (sp-*) ─────────────── */
+
+/* Traço que se desenha antes do eyebrow */
+.sp-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sp-eyebrow::before {
+  content: "";
+  width: 26px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--lime);
+  transform-origin: left;
+  animation: sp-dash 0.6s cubic-bezier(0.2, 0, 0, 1) 0.25s both;
+}
+
+@keyframes sp-dash {
+  from { scale: 0 1; }
+  to { scale: 1 1; }
+}
+
+/* Trilho de progresso ao lado dos passos */
+.sp-steps {
+  position: relative;
+  padding-left: 26px;
+}
+
+.sp-steps::before,
+.sp-steps::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 2px;
+  border-radius: 999px;
+}
+
+.sp-steps::before {
+  background: rgba(134, 225, 0, 0.14);
+}
+
+.sp-steps::after {
+  background: linear-gradient(180deg, var(--lime-bright), rgba(134, 225, 0, 0.12));
+  transform-origin: top;
+}
+
+.sp-reveal[data-visible="1"] .sp-steps::after {
+  animation: sp-rail 1.15s cubic-bezier(0.2, 0, 0, 1) 0.15s both;
+}
+
+@keyframes sp-rail {
+  from { scale: 1 0; }
+  to { scale: 1 1; }
+}
+
+/* Passos entram em cascata; hover usa `translate`/`scale` para não
+   brigar com o `transform` do keyframe de entrada. */
+.sp-step {
+  position: relative;
+  padding: 4px 0;
+}
+
+.sp-reveal[data-visible="1"] .sp-step {
+  animation: sp-step-in 0.5s cubic-bezier(0.2, 0, 0, 1) both;
+  animation-delay: calc(var(--i, 0) * 90ms + 200ms);
+}
+
+@keyframes sp-step-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+
+.sp-step::before {
+  content: "";
+  position: absolute;
+  left: -29px;
+  top: 14px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--lime-bright);
+  box-shadow: 0 0 12px rgba(134, 225, 0, 0.6);
+  opacity: 0;
+  scale: 0.3;
+  transition: opacity 0.22s ease, scale 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.sp-step:hover::before {
+  opacity: 1;
+  scale: 1;
+}
+
+.sp-step-n,
+.sp-step > div {
+  transition: translate 0.28s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.sp-step-n {
+  transition: translate 0.28s cubic-bezier(0.2, 0, 0, 1), scale 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
+    color 0.2s ease, text-shadow 0.25s ease;
+  transform-origin: left center;
+}
+
+.sp-step:hover .sp-step-n {
+  translate: 5px 0;
+  scale: 1.12;
+  color: var(--lime-bright);
+  text-shadow: 0 0 20px rgba(134, 225, 0, 0.45);
+}
+
+.sp-step:hover > div {
+  translate: 8px 0;
+}
+
+.sp-step strong {
+  transition: color 0.2s ease;
+}
+
+.sp-step:hover strong {
+  color: var(--lime);
+}
+
+/* Campos do formulário */
+.sp-form-card {
+  transition: border-color 0.3s ease, box-shadow 0.35s ease;
+}
+
+.sp-form-card:focus-within {
+  border-color: rgba(134, 225, 0, 0.3);
+  box-shadow: 0 0 46px rgba(134, 225, 0, 0.07);
+}
+
+.sp-field {
+  position: relative;
+}
+
+.sp-field label {
+  transition: color 0.2s ease, letter-spacing 0.25s ease;
+}
+
+.sp-field:focus-within label {
+  color: var(--lime);
+  letter-spacing: 0.12em;
+}
+
+/* Sublinhado que varre da esquerda quando o campo recebe foco */
+.sp-field::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 0;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--lime);
+  transform-origin: left;
+  scale: 0 1;
+  transition: scale 0.32s cubic-bezier(0.2, 0, 0, 1);
+  pointer-events: none;
+}
+
+.sp-field:focus-within::after {
+  scale: 1 1;
+}
+
+.sp-field input,
+.sp-field select,
+.sp-field textarea {
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.25s ease, translate 0.2s ease;
+}
+
+.sp-field input:hover,
+.sp-field select:hover,
+.sp-field textarea:hover {
+  border-color: rgba(134, 225, 0, 0.3);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.sp-field input:focus,
+.sp-field select:focus,
+.sp-field textarea:focus {
+  background: rgba(134, 225, 0, 0.05);
+  box-shadow: 0 0 0 3px rgba(134, 225, 0, 0.12);
+  translate: 0 -1px;
+}
+
+/* Campo já preenchido fica com a borda marcada */
+.sp-field input:not(:placeholder-shown),
+.sp-field textarea:not(:placeholder-shown),
+.sp-field select:not(:has(option[value=""]:checked)) {
+  border-color: rgba(134, 225, 0, 0.34);
+}
+
+.sp-field select {
+  cursor: pointer;
+}
+
+/* Botão de envio */
+.sp-submit {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: background 0.2s ease, box-shadow 0.28s ease, translate 0.18s ease;
+}
+
+.sp-submit::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 38%, rgba(255, 255, 255, 0.5) 50%, transparent 62%);
+  translate: -130% 0;
+}
+
+.sp-submit:hover::before {
+  transition: translate 0.6s ease;
+  translate: 130% 0;
+}
+
+.sp-submit:hover {
+  opacity: 1;
+  background: var(--lime-bright);
+  box-shadow: 0 12px 28px rgba(134, 225, 0, 0.28);
+  translate: 0 -2px;
+}
+
+.sp-submit:active {
+  translate: 0 1px;
+  box-shadow: 0 4px 12px rgba(134, 225, 0, 0.22);
+}
+
+.sp-submit-arrow {
+  transition: translate 0.24s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.sp-submit:hover .sp-submit-arrow {
+  translate: 5px 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sp-eyebrow::before,
+  .sp-reveal[data-visible="1"] .sp-steps::after,
+  .sp-reveal[data-visible="1"] .sp-step {
+    animation: none;
+  }
+
+  .sp-step:hover .sp-step-n,
+  .sp-step:hover > div,
+  .sp-submit:hover,
+  .sp-submit:active,
+  .sp-submit:hover .sp-submit-arrow,
+  .sp-field input:focus,
+  .sp-field select:focus,
+  .sp-field textarea:focus {
+    translate: none;
+    scale: none;
+  }
+
+  .sp-submit::before {
+    display: none;
+  }
+}
+/* FIM micro-interações sp-* */
+
+/* ── Formulário longo da avaliação ─────────────────────────────── */
+.sp-wrap--wide {
+  width: min(1180px, calc(100% - 48px));
+}
+
+.sp-body--form {
+  grid-template-columns: 0.78fr 1.22fr;
+}
+
+/* Os passos acompanham a rolagem do formulário longo */
+@media (min-width: 981px) {
+  .sp-body--form > *:first-child {
+    position: sticky;
+    top: 100px;
+  }
+}
+
+/* Par Sim/Não e escolha de intenção */
+.sp-field--choice::after {
+  display: none;
+}
+
+.sp-choice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 20px;
+  min-height: 42px;
+}
+
+/* precisa vencer `.sp-field label`, que é uppercase e minúsculo */
+.sp-field .sp-choice-opt,
+.sp-field .sp-choice-label {
+  text-transform: none;
+  letter-spacing: normal;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.sp-field .sp-choice-opt {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.sp-field .sp-choice-opt input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sp-choice-box {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 1px solid rgba(134, 225, 0, 0.24);
+  background: rgba(255, 255, 255, 0.04);
+  color: #071000;
+  transition: background 0.2s ease, border-color 0.2s ease, scale 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.sp-choice-box svg {
+  width: 14px;
+  height: 14px;
+  opacity: 0;
+  scale: 0.4;
+  transition: opacity 0.18s ease, scale 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.sp-field .sp-choice-opt:hover .sp-choice-box {
+  border-color: rgba(134, 225, 0, 0.55);
+  background: rgba(134, 225, 0, 0.1);
+}
+
+.sp-field .sp-choice-opt input:checked + .sp-choice-box {
+  background: var(--lime);
+  border-color: var(--lime);
+}
+
+.sp-field .sp-choice-opt input:checked + .sp-choice-box svg {
+  opacity: 1;
+  scale: 1;
+}
+
+.sp-field .sp-choice-opt input:checked ~ .sp-choice-label {
+  color: #fff;
+  font-weight: 600;
+}
+
+.sp-field .sp-choice-opt:active .sp-choice-box {
+  scale: 0.92;
+}
+
+.sp-field .sp-choice-opt input:focus-visible + .sp-choice-box {
+  outline: 2px solid var(--lime-bright);
+  outline-offset: 3px;
+}
+
+/* DDD + número */
+.sp-phone {
+  display: grid;
+  grid-template-columns: 76px 1fr;
+  gap: 8px;
+}
+
+@media (max-width: 980px) {
+  .sp-body--form {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .sp-field--phone .sp-phone {
+    grid-template-columns: 68px 1fr;
+  }
+}
+/* FIM formulário longo da avaliação */
+
+/* ══ SITE VIVO: parallax, revelações e micro-interações ══════════ */
+
+/* Barra de progresso da rolagem */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 90;
+  height: 3px;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.scroll-progress-fill {
+  display: block;
+  height: 100%;
+  transform: scaleX(0);
+  transform-origin: left center;
+  background: linear-gradient(90deg, var(--lime), var(--lime-bright));
+  box-shadow: 0 0 14px rgba(134, 225, 0, 0.7);
+}
+
+/* Camadas de parallax não podem cortar o layout */
+.hero-bg,
+.hero-scrim,
+.hero-inner {
+  will-change: translate;
+}
+
+/* Entrada ao entrar na tela */
+[data-reveal].will-reveal {
+  opacity: 0;
+  translate: 0 26px;
+  transition:
+    opacity 0.62s cubic-bezier(0.22, 1, 0.36, 1),
+    translate 0.62s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: calc(var(--i, 0) * 70ms);
+}
+
+[data-reveal].will-reveal.is-in {
+  opacity: 1;
+  translate: 0 0;
+}
+
+/* Header encolhe ao rolar */
+.site-masthead {
+  transition: min-height 0.32s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
+}
+
+.site-masthead.is-stuck {
+  min-height: 84px;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5);
+}
+
+.site-masthead.is-stuck::after {
+  animation: masthead-glow 2.6s ease-in-out infinite;
+}
+
+@keyframes masthead-glow {
+  0%, 100% { opacity: 0.75; }
+  50% { opacity: 1; }
+}
+
+/* Links do menu com sublinhado que cresce do centro */
+.menu a::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  right: 50%;
+  bottom: 6px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--lime);
+  opacity: 0;
+  transition: left 0.26s cubic-bezier(0.22, 1, 0.36, 1), right 0.26s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.2s ease;
+}
+
+.menu a:hover::after {
+  left: 14px;
+  right: 14px;
+  opacity: 1;
+}
+
+/* Botões do hero com brilho atravessando */
+.button {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease, background 0.24s ease;
+}
+
+.button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 36%, rgba(255, 255, 255, 0.4) 50%, transparent 64%);
+  translate: -130% 0;
+}
+
+.button:hover::after {
+  transition: translate 0.62s ease;
+  translate: 130% 0;
+}
+
+.button.primary:hover {
+  box-shadow: 0 20px 44px rgba(33, 77, 54, 0.42);
+}
+
+.button.ghost:hover {
+  background: rgba(134, 225, 0, 0.16);
+  border-color: rgba(134, 225, 0, 0.55);
+}
+
+.hero-cta .button span {
+  transition: translate 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hero-cta .button:hover span {
+  translate: 4px -2px;
+}
+
+/* Selos do hero reagem ao mouse */
+.hero-badges li {
+  transition: color 0.2s ease, translate 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hero-badges li:hover {
+  color: var(--lime-bright);
+  translate: 0 -2px;
+}
+
+/* Cards do "por que a Henrique": inclinação 3D + brilho no cursor */
+.whyus-card {
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: translate 0.24s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease,
+    border-color 0.24s ease, transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* o lift vira `translate` para o `transform` ficar livre pro tilt */
+.whyus-card:hover {
+  transform: none;
+  translate: 0 -5px;
+}
+
+.whyus-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), rgba(134, 225, 0, 0.22), transparent 70%);
+  transition: opacity 0.28s ease;
+}
+
+.whyus-card {
+  position: relative;
+}
+
+.whyus-card:hover::after {
+  opacity: 1;
+}
+
+.whyus-icon {
+  transition: scale 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), rotate 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background 0.24s ease;
+}
+
+.whyus-card:hover .whyus-icon {
+  scale: 1.1;
+  rotate: -6deg;
+}
+
+/* Cards do estoque */
+.stock-row {
+  transition:
+    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.25s ease,
+    border-color 0.25s ease,
+    opacity 0.62s cubic-bezier(0.22, 1, 0.36, 1),
+    translate 0.62s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.stock-row .price {
+  transition: color 0.22s ease, scale 0.26s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-origin: left center;
+}
+
+.stock-row:hover .price {
+  color: var(--red-dark);
+  scale: 1.06;
+}
+
+.stock-row .year-badge {
+  transition: translate 0.28s cubic-bezier(0.22, 1, 0.36, 1), background 0.24s ease;
+}
+
+.stock-row:hover .year-badge {
+  translate: 0 -3px;
+}
+
+.stock-row .open-detail {
+  transition: color 0.2s ease, letter-spacing 0.24s ease;
+}
+
+.stock-row:hover .open-detail {
+  letter-spacing: 0.02em;
+}
+
+/* Faixa de luz varrendo a foto do carro no hover */
+.showroom-media {
+  position: relative;
+  overflow: hidden;
+}
+
+.showroom-media::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 38%, rgba(255, 255, 255, 0.35) 50%, transparent 62%);
+  translate: -130% 0;
+}
+
+.stock-row:hover .showroom-media::before {
+  transition: translate 0.72s ease;
+  translate: 130% 0;
+}
+
+/* Endereço e contato */
+.address-bar a {
+  transition: color 0.2s ease, letter-spacing 0.24s ease;
+}
+
+.address-bar a:hover {
+  letter-spacing: 0.01em;
+}
+
+.contact-fact {
+  transition: translate 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.contact-fact:hover {
+  translate: 6px 0;
+}
+
+.contact-whats {
+  transition: translate 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease;
+}
+
+.contact-whats:hover {
+  translate: 0 -3px;
+  box-shadow: 0 16px 34px rgba(37, 211, 102, 0.3);
+}
+
+.contact-whats svg {
+  transition: rotate 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.contact-whats:hover svg {
+  rotate: -10deg;
+}
+
+/* Modal do veículo entra com escala */
+.vehicle-modal-content {
+  animation: modal-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes modal-in {
+  from { opacity: 0; transform: translateY(18px) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+
+.modal-cta {
+  transition: translate 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.26s ease, background 0.22s ease;
+}
+
+.modal-cta:hover {
+  translate: 0 -2px;
+}
+
+.vehicle-modal-close {
+  transition: rotate 0.32s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s ease;
+}
+
+.vehicle-modal-close:hover {
+  rotate: 90deg;
+}
+
+/* Botão flutuante do WhatsApp */
+.whatsapp-float {
+  transition: scale 0.26s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.28s ease;
+}
+
+.whatsapp-float:hover {
+  scale: 1.08;
+}
+
+/* Busca do topo */
+.nav-search input {
+  transition: background 0.22s ease, border-color 0.22s ease, width 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.nav-search input:focus {
+  background: rgba(134, 225, 0, 0.08);
+}
+
+.nav-search button {
+  transition: background 0.2s ease, translate 0.2s ease;
+}
+
+.nav-search button:hover {
+  translate: 0 -1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal],
+  .sp-reveal {
+    opacity: 1;
+    translate: none;
+    transform: none;
+    transition: none;
+  }
+
+  .scroll-progress,
+  .button::after,
+  .showroom-media::before,
+  .whyus-card::after {
+    display: none;
+  }
+
+  .site-masthead.is-stuck::after,
+  .vehicle-modal-content {
+    animation: none;
+  }
+
+  .whyus-card:hover,
+  .stock-row:hover .price,
+  .contact-fact:hover,
+  .contact-whats:hover,
+  .whatsapp-float:hover,
+  .hero-badges li:hover,
+  .whyus-card:hover .whyus-icon,
+  .vehicle-modal-close:hover {
+    translate: none;
+    scale: none;
+    rotate: none;
+  }
+}
+/* FIM site vivo */
+
+/* ── Página do veículo ─────────────────────────────────────────── */
+.vp-animate-in {
+  animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.vp-animate-in .modal-spec {
+  animation: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--i, 0) * 55ms + 180ms);
+}
+
+.vp-animate-in .modal-options-list span {
+  animation: rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--i, 0) * 40ms + 320ms);
+  transition: background 0.2s ease, color 0.2s ease, translate 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.vp-animate-in .modal-options-list span:hover {
+  translate: 0 -2px;
+  color: var(--lime-bright);
+}
+
+.modal-spec {
+  transition: background 0.22s ease, translate 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.modal-spec:hover {
+  translate: 0 -2px;
+}
+
+.vp-gallery-main img,
+.vp-gallery-main {
+  transition: scale 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.vp-gallery-main:hover img {
+  scale: 1.04;
+}
+
+.modal-price {
+  animation: rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vp-animate-in,
+  .vp-animate-in .modal-spec,
+  .vp-animate-in .modal-options-list span,
+  .modal-price {
+    animation: none;
+  }
+
+  .modal-spec:hover,
+  .vp-gallery-main:hover img,
+  .vp-animate-in .modal-options-list span:hover {
+    translate: none;
+    scale: none;
+  }
+}
+/* FIM página do veículo */
+

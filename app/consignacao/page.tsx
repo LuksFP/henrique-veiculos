@@ -2,7 +2,6 @@
 
 import { BrandLogo } from "@/components/brand-logo";
 import { ScrollReveal } from "@/components/scroll-reveal";
-import { ConsignmentCalculator } from "@/components/consignment-calculator";
 
 const WA = "https://wa.me/5513974066867";
 
@@ -35,7 +34,7 @@ export default function ConsignacaoPage() {
       <header className="vp-header">
         <div className="vp-header-inner">
           <a href="/" aria-label="Henrique Veículos"><BrandLogo /></a>
-          <a className="vp-back" href="/">← Voltar ao início</a>
+          <a className="vp-back" href="/">Voltar ao início</a>
         </div>
       </header>
 
@@ -47,10 +46,6 @@ export default function ConsignacaoPage() {
             <p className="sp-lede">Anuncie seu veículo com o suporte da Henrique Veículos. Atendimento no ponto físico, negociação acompanhada e mais visibilidade para o seu carro ou moto.</p>
           </div>
 
-          <ScrollReveal delay={80}>
-            <ConsignmentCalculator />
-          </ScrollReveal>
-
           <div className="sp-body">
             <ScrollReveal delay={100}>
               <div className="sp-steps">
@@ -59,8 +54,8 @@ export default function ConsignacaoPage() {
                   { n: "02", t: "Anúncio na loja", d: "Seu veículo fica exposto no nosso showroom e divulgado no nosso site." },
                   { n: "03", t: "Negociação acompanhada", d: "Nossa equipe cuida do atendimento e da negociação com os compradores." },
                   { n: "04", t: "Receba seu valor", d: "Após a venda, você recebe o valor acordado diretamente." },
-                ].map(({ n, t, d }) => (
-                  <div key={n} className="sp-step">
+                ].map(({ n, t, d }, i) => (
+                  <div key={n} className="sp-step" style={{ "--i": i } as React.CSSProperties}>
                     <span className="sp-step-n">{n}</span>
                     <div><strong>{t}</strong><p>{d}</p></div>
                   </div>
@@ -98,7 +93,10 @@ export default function ConsignacaoPage() {
                       <div className="sp-field sp-field--wide"><label>Informações adicionais</label><textarea name="notes" rows={3} placeholder="Acessórios, revisões, estado geral do veículo..." /></div>
                     </div>
                   </fieldset>
-                  <button className="sp-submit" type="submit">Enviar pelo WhatsApp</button>
+                  <button className="sp-submit" type="submit">
+                    Enviar pelo WhatsApp
+                    <span className="sp-submit-arrow" aria-hidden="true">→</span>
+                  </button>
                 </form>
               </div>
             </ScrollReveal>

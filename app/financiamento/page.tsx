@@ -32,7 +32,7 @@ export default function FinanciamentoPage() {
       <header className="vp-header">
         <div className="vp-header-inner">
           <a href="/" aria-label="Henrique Veículos"><BrandLogo /></a>
-          <a className="vp-back" href="/">← Voltar ao início</a>
+          <a className="vp-back" href="/">Voltar ao início</a>
         </div>
       </header>
 
@@ -56,8 +56,8 @@ export default function FinanciamentoPage() {
                   { n: "02", t: "Documentação necessária", d: "CNH, comprovante de residência e comprovante de renda (contracheque, extrato ou IR)." },
                   { n: "03", t: "Análise de crédito", d: "Trabalhamos com os principais bancos e financeiras para buscar a melhor taxa." },
                   { n: "04", t: "Aprovação e retirada", d: "Com o crédito aprovado, o veículo é seu. Atendimento presencial em Vicente de Carvalho." },
-                ].map(({ n, t, d }) => (
-                  <div key={n} className="sp-step">
+                ].map(({ n, t, d }, i) => (
+                  <div key={n} className="sp-step" style={{ "--i": i } as React.CSSProperties}>
                     <span className="sp-step-n">{n}</span>
                     <div><strong>{t}</strong><p>{d}</p></div>
                   </div>
@@ -86,7 +86,10 @@ export default function FinanciamentoPage() {
                       <div className="sp-field sp-field--wide"><label>Observações</label><textarea name="notes" rows={3} placeholder="Entrada disponível, renda aproximada..." /></div>
                     </div>
                   </fieldset>
-                  <button className="sp-submit" type="submit">Solicitar pelo WhatsApp</button>
+                  <button className="sp-submit" type="submit">
+                    Solicitar pelo WhatsApp
+                    <span className="sp-submit-arrow" aria-hidden="true">→</span>
+                  </button>
                 </form>
                 <div className="sp-address-links" style={{ marginTop: "16px" }}>
                   <a href={`${WA}?text=${encodeURIComponent("Olá, quero simular um financiamento na Henrique Veículos")}`} target="_blank" rel="noreferrer" className="sp-btn-ghost">Prefere o WhatsApp direto?</a>

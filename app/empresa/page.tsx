@@ -15,7 +15,7 @@ export default function EmpresaPage() {
       <header className="vp-header">
         <div className="vp-header-inner">
           <a href="/" aria-label="Henrique Veículos"><BrandLogo /></a>
-          <a className="vp-back" href="/">← Voltar ao início</a>
+          <a className="vp-back" href="/">Voltar ao início</a>
         </div>
       </header>
 

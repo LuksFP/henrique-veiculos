@@ -27,7 +27,7 @@ export default function ContatoPage() {
       <header className="vp-header">
         <div className="vp-header-inner">
           <a href="/" aria-label="Henrique Veículos"><BrandLogo /></a>
-          <a className="vp-back" href="/">← Voltar ao início</a>
+          <a className="vp-back" href="/">Voltar ao início</a>
         </div>
       </header>
 
@@ -74,7 +74,10 @@ export default function ContatoPage() {
                     <div className="sp-field"><label>E-mail</label><input name="email" type="email" placeholder="seu@email.com" /></div>
                     <div className="sp-field sp-field--wide"><label>Mensagem</label><textarea name="notes" rows={4} placeholder="Como podemos te ajudar?" /></div>
                   </div>
-                  <button className="sp-submit" type="submit">Enviar pelo WhatsApp</button>
+                  <button className="sp-submit" type="submit">
+                    Enviar pelo WhatsApp
+                    <span className="sp-submit-arrow" aria-hidden="true">→</span>
+                  </button>
                 </form>
               </div>
             </ScrollReveal>

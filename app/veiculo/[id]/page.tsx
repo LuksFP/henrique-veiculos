@@ -84,7 +84,7 @@ export default async function VehiclePage({ params }: Props) {
             <BrandLogo />
           </a>
           <a className="vp-back" href="/#estoque">
-            ← Voltar ao estoque
+            Voltar ao estoque
           </a>
         </div>
       </header>
@@ -108,14 +108,14 @@ export default async function VehiclePage({ params }: Props) {
             )}
           </div>
 
-          <div className="modal-info">
+          <div className="modal-info vp-animate-in">
             <span className="modal-eyebrow">{vehicle.make}</span>
             <h1 className="modal-title">{vehicle.model}</h1>
             <div className="modal-price">{vehicle.price}</div>
 
             <div className="modal-specs">
-              {specs.map(([label, value]) => (
-                <div className="modal-spec" key={label}>
+              {specs.map(([label, value], i) => (
+                <div className="modal-spec" key={label} style={{ "--i": i } as React.CSSProperties}>
                   <span className="modal-spec-label">{label}</span>
                   <span className="modal-spec-value">{value}</span>
                 </div>
@@ -126,8 +126,10 @@ export default async function VehiclePage({ params }: Props) {
               <div className="modal-options">
                 <h4>Opcionais</h4>
                 <div className="modal-options-list">
-                  {vehicle.options.map((option) => (
-                    <span key={option}>{option}</span>
+                  {vehicle.options.map((option, i) => (
+                    <span key={option} style={{ "--i": Math.min(i, 11) } as React.CSSProperties}>
+                      {option}
+                    </span>
                   ))}
                 </div>
               </div>
